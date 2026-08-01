@@ -37,6 +37,11 @@ export const sidebarItems: SidebarItem[] = [
     ],
   },
   {
+    icon: Building2,
+    label: "Organization",
+    href: "/admin/organization",
+  },
+  {
     icon: Settings,
     label: "Settings",
     href: "/admin/settings",

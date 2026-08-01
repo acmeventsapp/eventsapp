@@ -12,6 +12,7 @@ export const FormFieldTypeEnum = z.enum([
   "CHECKBOX",
   "DATE",
   "IMAGE",
+  "ORG_BRANCH",
 ]);
 
 export const FormFieldSchema = z

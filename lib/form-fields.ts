@@ -12,6 +12,7 @@ export const FORM_FIELD_TYPE_LABELS: Record<FormFieldType, string> = {
   CHECKBOX: "Checkboxes",
   DATE: "Date",
   IMAGE: "Photo upload",
+  ORG_BRANCH: "Branch / Organization unit",
 };
 
 export const DEFAULT_EVENT_FORM_FIELDS: FormFieldFormValues[] = [
@@ -115,6 +116,22 @@ export function formatResponseValue(value: unknown, fieldType?: FormFieldType): 
     /^https?:\/\/.+/i.test(value)
   ) {
     return "Photo provided";
+  }
+  if (
+    (fieldType === "ORG_BRANCH" || typeof value === "object") &&
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  ) {
+    const org = value as {
+      zoneName?: string;
+      unitName?: string;
+      branchName?: string;
+    };
+    const parts = [org.zoneName, org.unitName, org.branchName].filter(
+      (part): part is string => Boolean(part && part.trim())
+    );
+    if (parts.length > 0) return parts.join(" / ");
   }
   return String(value);
 }

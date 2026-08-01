@@ -1,16 +1,30 @@
 import { z } from "zod";
 import {
-  fieldHasOptions,
   isMultiValueField,
   normalizeFieldOptions,
 } from "@/lib/form-fields";
+import {
+  isOrgBranchValue,
+  OrgBranchValueSchema,
+  type OrgBranchValue,
+} from "@/validators/schemas/organization";
+import type { RegistrationResponses } from "@/validators/types/event";
 import type { FormFieldUI } from "@/validators/types/form-field";
 
-export type DynamicRegistrationValues = Record<string, string | string[] | boolean>;
+export type DynamicRegistrationValues = Record<
+  string,
+  string | string[] | boolean | OrgBranchValue | null
+>;
 
 function buildFieldValidator(field: FormFieldUI) {
   const label = field.label;
   const options = normalizeFieldOptions(field.options);
+
+  if (field.fieldType === "ORG_BRANCH") {
+    return field.required
+      ? OrgBranchValueSchema
+      : OrgBranchValueSchema.nullable();
+  }
 
   if (field.fieldType === "EMAIL") {
     let schema = z.string().email(`Enter a valid ${label.toLowerCase()}`);
@@ -138,6 +152,11 @@ export function buildDynamicRegistrationDefaults(fields: FormFieldUI[]) {
       continue;
     }
 
+    if (field.fieldType === "ORG_BRANCH") {
+      defaults[field.fieldKey] = null;
+      continue;
+    }
+
     defaults[field.fieldKey] = "";
   }
 
@@ -148,7 +167,7 @@ export function serializeRegistrationResponses(
   fields: FormFieldUI[],
   values: DynamicRegistrationValues
 ) {
-  const responses: Record<string, string | string[] | boolean> = {};
+  const responses: RegistrationResponses = {};
 
   for (const field of fields) {
     const value = values[field.fieldKey];
@@ -160,6 +179,13 @@ export function serializeRegistrationResponses(
 
     if (field.fieldType === "CHECKBOX" && normalizeFieldOptions(field.options).length === 0) {
       responses[field.fieldKey] = Boolean(value);
+      continue;
+    }
+
+    if (field.fieldType === "ORG_BRANCH") {
+      if (isOrgBranchValue(value)) {
+        responses[field.fieldKey] = value;
+      }
       continue;
     }
 

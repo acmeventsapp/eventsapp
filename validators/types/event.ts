@@ -2,8 +2,14 @@ import type { Event, EventAssignmentGroup, EventFormField, EventRegistration, Ev
 import { formatResponseValue, getResponsePreview } from "@/lib/form-fields";
 import { getPhotoUrlFromResponses } from "@/lib/name-tag";
 import { parseTagFieldKeys } from "@/lib/tag-fields";
+import type { OrgBranchValue } from "@/validators/schemas/organization";
 import { toFormFieldUI, type FormFieldUI } from "@/validators/types/form-field";
 import { toEventSpeakerUI, type EventSpeakerUI } from "@/validators/types/speaker";
+
+export type RegistrationResponses = Record<
+  string,
+  string | string[] | boolean | OrgBranchValue
+>;
 
 export interface AssignmentGroupUI {
   id: string;
@@ -61,7 +67,7 @@ export interface RegistrationUI {
   contactName: string;
   contactEmail: string;
   contactPhone: string;
-  responses: Record<string, string | string[] | boolean>;
+  responses: RegistrationResponses;
   labeledResponses: Array<{ fieldKey: string; label: string; value: string }>;
   responsePreview: string;
   assignedGroup: string | null;
@@ -142,10 +148,7 @@ export function toRegistrationUI(
     assignmentGroup?: { name: string } | null;
   }
 ): RegistrationUI {
-  const responses = (registration.responses ?? {}) as Record<
-    string,
-    string | string[] | boolean
-  >;
+  const responses = (registration.responses ?? {}) as RegistrationResponses;
   const formFields = (registration.event.formFields ?? [])
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)

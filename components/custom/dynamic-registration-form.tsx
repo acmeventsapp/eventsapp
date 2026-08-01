@@ -25,12 +25,14 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUploader from "@/components/custom/imageuploader";
+import OrgHierarchyPicker from "@/components/custom/org-hierarchy-picker";
 import { isMultiValueField, normalizeFieldOptions } from "@/lib/form-fields";
 import {
   buildDynamicRegistrationDefaults,
   buildDynamicRegistrationSchema,
   type DynamicRegistrationValues,
 } from "@/validators/schemas/registration";
+import { isOrgBranchValue } from "@/validators/schemas/organization";
 import type { FormFieldUI } from "@/validators/types/form-field";
 
 interface DynamicRegistrationFormProps {
@@ -212,6 +214,37 @@ export default function DynamicRegistrationForm({
                 field={field}
                 control={form.control}
                 setValue={form.setValue}
+              />
+            );
+          }
+
+          if (field.fieldType === "ORG_BRANCH") {
+            return (
+              <FormField
+                key={field.id}
+                control={form.control}
+                name={field.fieldKey}
+                render={({ field: formField }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {field.label}
+                      {field.required ? <span className="text-red-500"> *</span> : ""}
+                    </FormLabel>
+                    <FormControl>
+                      <OrgHierarchyPicker
+                        value={
+                          isOrgBranchValue(formField.value) ? formField.value : null
+                        }
+                        onChange={formField.onChange}
+                        required={field.required}
+                      />
+                    </FormControl>
+                    {field.helpText ? (
+                      <FormDescription>{field.helpText}</FormDescription>
+                    ) : null}
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             );
           }

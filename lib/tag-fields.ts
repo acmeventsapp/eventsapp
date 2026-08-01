@@ -6,7 +6,8 @@ export function isTagEligibleField(field: TagFieldCandidate) {
   return (
     field.fieldType !== "EMAIL" &&
     field.fieldType !== "PHONE" &&
-    field.fieldType !== "IMAGE"
+    field.fieldType !== "IMAGE" &&
+    field.fieldType !== "ORG_BRANCH"
   );
 }
 

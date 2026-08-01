@@ -320,7 +320,10 @@ export default function FormFieldBuilder() {
                     <FormItem>
                       <FormLabel>Placeholder</FormLabel>
                       <FormControl>
-                        <Input {...placeholderField} />
+                        <Input
+                          {...placeholderField}
+                          disabled={fieldType === "ORG_BRANCH"}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -341,6 +344,14 @@ export default function FormFieldBuilder() {
                   )}
                 />
               </div>
+
+              {fieldType === "ORG_BRANCH" ? (
+                <p className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                  Registrants will pick Zone → Unit → Branch from the Organization
+                  hierarchy managed under Admin → Organization. No custom options
+                  are needed.
+                </p>
+              ) : null}
 
               {showDependencyControls ? (
                 <FormField

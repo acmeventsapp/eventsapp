@@ -1,4 +1,5 @@
 import { formatResponseValue } from "@/lib/form-fields";
+import type { RegistrationResponses } from "@/validators/types/event";
 import type { FormFieldUI } from "@/validators/types/form-field";
 import { Resend } from "resend";
 
@@ -41,7 +42,7 @@ export function buildRegistrationConfirmationEmail(params: {
   registrationId: string;
   amount: string;
   isPaid: boolean;
-  responses?: Record<string, string | string[] | boolean>;
+  responses?: RegistrationResponses;
   formFields?: FormFieldUI[];
   assignedGroup?: string | null;
   reprintUrl?: string;
@@ -59,7 +60,7 @@ export function buildRegistrationConfirmationEmail(params: {
       ? params.formFields
           .map(
             (field) =>
-              `<p><strong>${field.label}:</strong> ${formatResponseValue(params.responses?.[field.fieldKey])}</p>`
+              `<p><strong>${field.label}:</strong> ${formatResponseValue(params.responses?.[field.fieldKey], field.fieldType)}</p>`
           )
           .join("")
       : "";

@@ -14,7 +14,11 @@ import {
   serializeRegistrationResponses,
   type DynamicRegistrationValues,
 } from "@/validators/schemas/registration";
-import { toRegistrationUI, type RegistrationUI } from "@/validators/types/event";
+import {
+  toRegistrationUI,
+  type RegistrationResponses,
+  type RegistrationUI,
+} from "@/validators/types/event";
 import type { PaymentStatus, Prisma, RegistrationStatus } from "@prisma/client";
 
 export interface CreateRegistrationInput {
@@ -327,10 +331,7 @@ export async function updateRegistrationStatus(
 
     if (shouldAssign) {
       const formFields = (registration.event.formFields ?? []).map(toFormFieldUI);
-      const responses = registration.responses as Record<
-        string,
-        string | string[] | boolean
-      >;
+      const responses = registration.responses as RegistrationResponses;
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
       await sendEmail({
