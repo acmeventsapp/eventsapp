@@ -10,8 +10,8 @@ const prisma = new PrismaClient({
 const SEED_ADMINS = [
   {
     name: "Super Admin",
-    email: "asmdonevents@gmail.com",
-    password: "asm@2026",
+    email: "acmugwuagbaarchevents@gmail.com",
+    password: "acmevents2026",
     role: "SUPER_ADMIN" as const,
   },
 ];

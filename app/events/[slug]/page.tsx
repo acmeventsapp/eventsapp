@@ -21,23 +21,23 @@ export async function generateMetadata({
 
   if (!event || event.status !== "PUBLISHED") {
     return {
-      title: "Event not found | ASM Events",
+      title: "Event not found | ACM Events Center",
     };
   }
 
   const url = `${siteUrl}/events/${event.slug}`;
   const description =
     toPlainDescription(event.description).slice(0, 160) ||
-    `Register for ${event.title} on ASM Events.`;
+    `Register for ${event.title} on ACM Ugwuagba Arch Events Center.`;
 
   return {
-    title: `${event.title} | ASM Events`,
+    title: `${event.title} | ACM Events Center`,
     description,
     openGraph: {
       title: event.title,
       description,
       url,
-      siteName: "ASM Events",
+      siteName: "ACM Ugwuagba Arch Events Center",
       type: "website",
       ...(event.bannerImage
         ? {

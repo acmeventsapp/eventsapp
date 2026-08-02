@@ -69,7 +69,7 @@ const AppSidebar = () => {
             </div>
             {state === "expanded" && (
               <span className="text-2xl font-bold tracking-tight text-primary dark:text-muted-foreground">
-                ASM Events
+                ACM Events
               </span>
             )}
             {isMobile && (

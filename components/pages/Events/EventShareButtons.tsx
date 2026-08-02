@@ -50,7 +50,7 @@ export default function EventShareButtons({
         Share this event
       </div>
       <div className="flex flex-wrap items-center gap-2 justify-center">
-        <FacebookShareButton url={url} hashtag="#ASMEvents">
+        <FacebookShareButton url={url} hashtag="#ACMEvents">
           <ShareIconButton>
             <FaFacebook className="size-4" />
           </ShareIconButton>

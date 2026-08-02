@@ -12,20 +12,20 @@ import { CalendarDays, ClipboardList, CreditCard } from "lucide-react";
 
 const features = [
   {
-    title: "ASM events & programs",
+    title: "ACM events & programs",
     description:
-      "See upcoming conferences, retreats, Bible study gatherings, and other ASM programs in one place.",
+      "See upcoming conferences, retreats, gatherings, and other ACM Ugwuagba Arch programs in one place — paid and free.",
     illustration: EventListingIllustration,
     icon: CalendarDays,
-    accent: "from-asm-lime-green/20 to-asm-ivory dark:from-asm-lime-green/15 dark:to-muted",
+    accent: "from-brand-green/20 to-asm-ivory dark:from-brand-green/15 dark:to-muted",
   },
   {
     title: "Simple registration",
     description:
-      "Register for ASM events in a few minutes. No account needed — just fill in the form and confirm your spot.",
+      "Register for ACM events in a few minutes. No account needed — just fill in the form and confirm your spot.",
     illustration: GuestRegistrationIllustration,
     icon: ClipboardList,
-    accent: "from-asm-terracotta/15 to-asm-ivory dark:from-asm-terracotta/20 dark:to-muted",
+    accent: "from-primary/15 to-asm-ivory dark:from-primary/20 dark:to-muted",
   },
   {
     title: "Secure online payment",
@@ -33,7 +33,7 @@ const features = [
       "Pay for tickets through Paystack and receive instant confirmation, email updates, and your printable name tag.",
     illustration: PaymentIllustration,
     icon: CreditCard,
-    accent: "from-asm-black/10 to-asm-ivory dark:from-white/5 dark:to-muted",
+    accent: "from-brand-gold/20 to-asm-ivory dark:from-brand-gold/10 dark:to-muted",
   },
 ] as const;
 
@@ -42,41 +42,39 @@ export default function HomePage() {
     <PublicLayoutShell>
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-16">
         <div className="flex flex-col items-center gap-5 text-center">
-          <div className="relative inline-flex items-center overflow-hidden rounded-full border border-asm-terracotta/20 bg-card px-1 py-1 shadow-sm">
-            {/* <span className="absolute inset-y-0 left-0 w-1 bg-asm-lime-green" aria-hidden /> */}
+          <div className="relative inline-flex items-center overflow-hidden rounded-full border border-primary/20 bg-card px-1 py-1 shadow-sm">
             <span className="flex items-center gap-2 pl-4 pr-3 py-1">
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-asm-lime-green opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-asm-lime-green" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand-green opacity-60" />
+                <span className="relative inline-flex size-2 rounded-full bg-brand-green" />
               </span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-asm-terracotta">
-                ASM
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                ACM
               </span>
               <span className="h-3 w-px bg-border" aria-hidden />
               <span className="text-sm font-medium text-foreground">
-                Anglican Student Movement
+                Ugwuagba Arch
               </span>
             </span>
           </div>
 
           <h1 className="max-w-4xl font-semibold tracking-tight text-[2.5rem] lg:text-5xl xl:text-[3.8rem] leading-tight md:leading-[1.1]">
-            Register for ASM{" "}
-            <span className="text-asm-terracotta">events & programs</span>
+            ACM Ugwuagba Arch{" "}
+            <span className="text-primary">Events Center</span>
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            The official registration hub for the Anglican Student Movement — sign up
-            for conferences, pay for tickets, and get everything you need before you
-            arrive.
+            Register for paid and free events, and let admins track the
+            organization directory — zones, units, and branches — from one place.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/events" className={cn(buttonVariants({ size: "lg" }))}>
-              View ASM events
+              View ACM events
             </Link>
             <Link
               href="/admin/auth/login"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
             >
-              ASM admin login
+              ACM admin login
             </Link>
           </div>
         </div>
@@ -94,7 +92,7 @@ export default function HomePage() {
                 )}
               >
                 <div className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-full bg-card/80 shadow-sm">
-                  <Icon className="size-4 text-asm-terracotta" />
+                  <Icon className="size-4 text-primary" />
                 </div>
                 <Illustration />
               </div>

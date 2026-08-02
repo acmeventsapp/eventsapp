@@ -158,7 +158,7 @@ export async function requestAdminEmailChange(input: { email: string }) {
 
     await sendEmail({
       to: nextEmail,
-      subject: "Verify your new ASM admin email",
+      subject: "Verify your new ACM admin email",
       html: buildAdminEmailVerificationEmail({
         name: auth.admin.name,
         code,

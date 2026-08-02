@@ -427,7 +427,7 @@ export default function AdminDashboard() {
         ) : (
           <PageHeader
             title={greeting}
-            description="Overview of ASM events, registrations, and payments."
+            description="Overview of ACM events, registrations, and payments."
           />
         )}
       </div>

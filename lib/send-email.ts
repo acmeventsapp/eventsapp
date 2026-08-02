@@ -95,7 +95,7 @@ export function buildAdminEmailVerificationEmail(params: {
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Verify your admin email</h2>
       <p>Hello ${params.name},</p>
-      <p>Use the verification code below to confirm your new ASM admin email address.</p>
+      <p>Use the verification code below to confirm your new ACM admin email address.</p>
       <p style="font-size: 28px; font-weight: bold; letter-spacing: 6px;">${params.code}</p>
       <p>This code expires in ${params.expiresMinutes} minutes.</p>
       <p>If you did not request this change, you can ignore this email.</p>

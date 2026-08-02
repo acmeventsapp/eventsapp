@@ -53,7 +53,7 @@ export default function AdminLoginForm() {
         <CardHeader>
           <Image
             src="/images/acm_logo.png"
-            alt="ASM Events"
+            alt="ACM Ugwuagba Arch"
             width={100}
             height={100}
             className="w-16 h-16 mx-auto"

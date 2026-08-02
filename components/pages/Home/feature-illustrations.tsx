@@ -62,22 +62,22 @@ export function PaymentIllustration() {
       className="h-24 w-full"
       aria-hidden
     >
-      <rect x="14" y="24" width="92" height="56" rx="8" className="fill-asm-black" />
+      <rect x="14" y="24" width="92" height="56" rx="8" className="fill-foreground dark:fill-muted" />
       <rect x="14" y="24" width="92" height="16" rx="8" className="fill-asm-terracotta" />
       <rect x="14" y="32" width="92" height="8" className="fill-asm-terracotta" />
       <rect x="22" y="48" width="24" height="16" rx="3" className="fill-asm-lime-green/90" />
-      <rect x="52" y="52" width="42" height="4" rx="2" className="fill-white/30" />
-      <rect x="52" y="60" width="28" height="4" rx="2" className="fill-white/20" />
+      <rect x="52" y="52" width="42" height="4" rx="2" className="fill-background/40 dark:fill-foreground/30" />
+      <rect x="52" y="60" width="28" height="4" rx="2" className="fill-background/30 dark:fill-foreground/20" />
       <circle cx="88" cy="20" r="16" className="fill-asm-lime-green stroke-card" strokeWidth="3" />
       <path
         d="M82 20l4 4 8-10"
-        className="stroke-asm-black"
+        className="stroke-background"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="8" y="68" width="32" height="20" rx="4" className="fill-card stroke-asm-terracotta/25" strokeWidth="1.5" transform="rotate(-8 24 78)" />
-      <rect x="76" y="66" width="32" height="20" rx="4" className="fill-card stroke-asm-terracotta/25" strokeWidth="1.5" transform="rotate(8 92 76)" />
+      <rect x="8" y="68" width="32" height="20" rx="4" className="fill-muted stroke-asm-terracotta/25" strokeWidth="1.5" transform="rotate(-8 24 78)" />
+      <rect x="76" y="66" width="32" height="20" rx="4" className="fill-muted stroke-asm-terracotta/25" strokeWidth="1.5" transform="rotate(8 92 76)" />
     </svg>
   );
 }

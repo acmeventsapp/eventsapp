@@ -19,8 +19,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ASM Events | Registration & Payments",
-  description: "Organization event registration and payment platform",
+  title: "ACM Ugwuagba Arch Events Center",
+  description:
+    "Register for paid and free events, and manage the ACM Ugwuagba Arch organization directory from the admin side.",
 };
 
 export default function RootLayout({
