@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import AppSidebar from "@/components/admin/sidebar/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ScrollArea } from "../ui/scroll-area";
@@ -10,16 +11,30 @@ export default function AdminLayoutShell({
 }: {
   children: React.ReactNode;
 }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const onScroll = () => {
+      setScrolled(viewport.scrollTop > 8);
+    };
+
+    onScroll();
+    viewport.addEventListener("scroll", onScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <SidebarProvider>
-      {/* Sidebar Component goes here */}
       <AppSidebar />
 
-      {/* Main Component goes here */}
-      <div className="w-full h-screen overflow-hidden">
-        <Navbar />
-        <ScrollArea className="h-[calc(100vh-56px)]">
-          <div className="p-4 pt-0 md:pr-6 md:pt-1 pb-10 w-screen md:w-full mx-auto">
+      <div className="flex h-svh min-w-0 flex-1 flex-col overflow-hidden">
+        <Navbar scrolled={scrolled} />
+        <ScrollArea className="min-h-0 flex-1" viewportRef={viewportRef}>
+          <div className="mx-auto w-full max-w-full p-3 pb-10 sm:p-4 md:pr-6 md:pt-1">
             {children}
           </div>
         </ScrollArea>

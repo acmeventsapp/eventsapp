@@ -5,12 +5,17 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import SearchInputComponent from "./search-input";
 import AvatarDropdownComponent from "./avatar-dropdown";
 import NotificationBtn from "./notification-btn";
 import ThemeSwitcherComponent from "./theme-switcher";
 
-const Navbar = () => {
+type NavbarProps = {
+  scrolled?: boolean;
+};
+
+const Navbar = ({ scrolled = false }: NavbarProps) => {
   const mounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -20,19 +25,26 @@ const Navbar = () => {
 
   if (!mounted) {
     return (
-      <div className="flex h-14 items-center gap-4 bg-card px-4 lg:px-6 border-b border-border">
-        <Skeleton className="h-8 w-8" />
-        <Skeleton className="h-8 flex-1 max-w-sm" />
-        <div className="ml-auto flex items-center gap-3">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-24" />
+      <div className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-card px-3 sm:gap-3 sm:px-4 lg:px-6">
+        <Skeleton className="h-8 w-8 shrink-0" />
+        <Skeleton className="h-8 w-8 shrink-0 sm:max-w-sm sm:flex-1" />
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <Skeleton className="h-8 w-8 shrink-0" />
+          <Skeleton className="h-8 w-8 shrink-0" />
         </div>
       </div>
     );
   }
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80 px-4 lg:px-6 border-b border-border">
+    <header
+      className={cn(
+        "sticky top-0 z-20 flex h-14 shrink-0 items-center gap-1.5 border-b px-3 transition-[background-color,backdrop-filter,box-shadow,border-color] duration-200 sm:gap-3 sm:px-4 lg:px-6",
+        scrolled
+          ? "border-border/70 bg-card/65 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-card/50"
+          : "border-border bg-card/95 backdrop-blur-md supports-backdrop-filter:bg-card/80",
+      )}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -43,11 +55,11 @@ const Navbar = () => {
         <span className="sr-only">Toggle sidebar</span>
       </Button>
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 md:max-w-sm md:flex-1">
         <SearchInputComponent />
       </div>
 
-      <div className="ml-auto flex items-center gap-1 sm:gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1.5">
         <ThemeSwitcherComponent />
         <NotificationBtn />
         <AvatarDropdownComponent />
