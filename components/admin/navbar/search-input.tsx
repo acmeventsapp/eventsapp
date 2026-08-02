@@ -57,7 +57,7 @@ export default function SearchInputComponent() {
     <>
       <button
         type="button"
-        className="bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full max-w-sm rounded-md px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] hidden md:inline-flex"
+        className="bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-ring/50 hidden h-9 w-full max-w-sm rounded-md px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:inline-flex"
         onClick={() => setOpen(true)}
       >
         <span className="flex grow items-center">

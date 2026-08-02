@@ -258,7 +258,7 @@ function RegistrationDistributionChart({
             <>
               <ChartContainer
                 config={chartConfig}
-                className="mx-auto aspect-square h-[280px] shrink-0"
+                className="mx-auto aspect-square h-70 shrink-0"
               >
                 <PieChart>
                   <ChartTooltip

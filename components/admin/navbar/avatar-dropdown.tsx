@@ -65,7 +65,7 @@ export default function AvatarDropdownComponent({
             </span>
             <ChevronDownIcon
               size={16}
-              className="opacity-60"
+              className="hidden opacity-60 sm:block"
               aria-hidden="true"
             />
           </Button>
