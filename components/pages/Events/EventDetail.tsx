@@ -181,15 +181,17 @@ export default function EventDetailPage({ slug }: { slug: string }) {
               {event.isFree ? "Register for free" : "Register & pay"}
             </Link>
           )}
-          <Link
-            href={`/events/${event.slug}/reprint`}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "inline-flex",
-            )}
-          >
-            Reprint your tag
-          </Link>
+          {event.tagsEnabled ? (
+            <Link
+              href={`/events/${event.slug}/reprint`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "inline-flex",
+              )}
+            >
+              Reprint your tag
+            </Link>
+          ) : null}
           <Link
             href="/events"
             className={cn(

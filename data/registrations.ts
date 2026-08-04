@@ -34,6 +34,7 @@ const registrationInclude = {
       venue: true,
       startDate: true,
       endDate: true,
+      tagsEnabled: true,
       tagPrimaryColor: true,
       tagSecondaryColor: true,
       tagFooterText: true,
@@ -176,6 +177,13 @@ export async function lookupRegistrationForTagReprint(input: {
       };
     }
 
+    if (!match.event.tagsEnabled) {
+      return {
+        success: false as const,
+        error: "Name tags are not available for this event.",
+      };
+    }
+
     return { success: true as const, data: toRegistrationUI(match) };
   } catch (error) {
     console.error("lookupRegistrationForTagReprint", error);
@@ -228,7 +236,7 @@ export async function createRegistration(input: CreateRegistrationInput) {
     const responses = serializeRegistrationResponses(formFields, parsed.data);
     const contact = extractContactFromResponses(formFields, responses);
 
-    if (!contact.contactEmail) {
+    if (!event.isFree && !contact.contactEmail) {
       return { success: false as const, error: "A valid email response is required" };
     }
 
@@ -243,7 +251,7 @@ export async function createRegistration(input: CreateRegistrationInput) {
         data: {
           eventId: event.id,
           responses,
-          contactEmail: contact.contactEmail,
+          contactEmail: contact.contactEmail || null,
           contactName: contact.contactName || null,
           contactPhone: contact.contactPhone || null,
           amount,
@@ -262,10 +270,10 @@ export async function createRegistration(input: CreateRegistrationInput) {
       });
     });
 
-    if (event.isFree) {
+    if (event.isFree && registration.contactEmail) {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
       await sendEmail({
-        to: registration.contactEmail!,
+        to: registration.contactEmail,
         subject: `Registration confirmed — ${event.title}`,
         html: buildRegistrationConfirmationEmail({
           fullName: registration.contactName || "there",
@@ -278,7 +286,9 @@ export async function createRegistration(input: CreateRegistrationInput) {
           assignedGroup,
           responses,
           formFields,
-          reprintUrl: `${siteUrl}/events/${event.slug}/reprint`,
+          reprintUrl: event.tagsEnabled
+            ? `${siteUrl}/events/${event.slug}/reprint`
+            : undefined,
         }),
       });
     }
@@ -348,7 +358,9 @@ export async function updateRegistrationStatus(
           assignedGroup: assignedGroup ?? registration.assignmentGroup?.name ?? null,
           responses,
           formFields,
-          reprintUrl: `${siteUrl}/events/${registration.event.slug}/reprint`,
+          reprintUrl: registration.event.tagsEnabled
+            ? `${siteUrl}/events/${registration.event.slug}/reprint`
+            : undefined,
         }),
       });
     }

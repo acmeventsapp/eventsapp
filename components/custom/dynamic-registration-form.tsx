@@ -226,19 +226,21 @@ export default function DynamicRegistrationForm({
                 name={field.fieldKey}
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>
-                      {field.label}
-                      {field.required ? <span className="text-red-500"> *</span> : ""}
-                    </FormLabel>
-                    <FormControl>
-                      <OrgHierarchyPicker
-                        value={
-                          isOrgBranchValue(formField.value) ? formField.value : null
-                        }
-                        onChange={formField.onChange}
-                        required={field.required}
-                      />
-                    </FormControl>
+                    <fieldset className="min-w-0 border-0 p-0">
+                      <legend className="sr-only">
+                        {field.label}
+                        {field.required ? " (required)" : ""}
+                      </legend>
+                      <FormControl>
+                        <OrgHierarchyPicker
+                          value={
+                            isOrgBranchValue(formField.value) ? formField.value : null
+                          }
+                          onChange={formField.onChange}
+                          required={field.required}
+                        />
+                      </FormControl>
+                    </fieldset>
                     {field.helpText ? (
                       <FormDescription>{field.helpText}</FormDescription>
                     ) : null}

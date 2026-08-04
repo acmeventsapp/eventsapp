@@ -90,7 +90,7 @@ function StatCard({
     <Link href={href} className="block">
       <Card
         className={cn(
-          "relative overflow-hidden py-4 transition-shadow hover:shadow-md",
+          "relative overflow-hidden py-4 transition-shadow hover:shadow-md ",
           highlight && "border-primary/50"
         )}
       >
@@ -103,12 +103,12 @@ function StatCard({
         <CardContent className="py-0">
           <div className="truncate text-2xl font-bold">{value}</div>
           <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-          <Badge variant="outline" size={"sm"} className="mt-2 text-xs">
+          <Badge variant="secondary" size={"sm"} className="mt-2 text-xs">
             {trend}
           </Badge>
         </CardContent>
 
-        <div className="pointer-events-none absolute right-0 bottom-0 flex h-2/3 w-2/3 items-end justify-end overflow-hidden opacity-5">
+        <div className="pointer-events-none  dark:hidden absolute right-0 bottom-0 flex h-2/3 w-2/3 items-end justify-end overflow-hidden opacity-5">
           <Icon
             className={cn(
               "h-full w-full -rotate-45 translate-x-1/4 translate-y-1/4 transform",

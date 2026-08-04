@@ -43,6 +43,7 @@ export interface EventUI {
   formFields: FormFieldUI[];
   speakers: EventSpeakerUI[];
   assignmentGroups: AssignmentGroupUI[];
+  tagsEnabled: boolean;
   tagPrimaryColor: string;
   tagSecondaryColor: string;
   tagFooterText: string | null;
@@ -59,6 +60,7 @@ export interface RegistrationUI {
   eventVenue: string;
   eventStartDate: string;
   eventEndDate: string;
+  tagsEnabled: boolean;
   tagPrimaryColor: string;
   tagSecondaryColor: string;
   tagFooterText: string | null;
@@ -120,6 +122,7 @@ export function toEventUI(event: EventWithCounts): EventUI {
     formFields,
     speakers,
     assignmentGroups,
+    tagsEnabled: event.tagsEnabled,
     tagPrimaryColor: event.tagPrimaryColor,
     tagSecondaryColor: event.tagSecondaryColor,
     tagFooterText: event.tagFooterText,
@@ -138,6 +141,7 @@ export function toRegistrationUI(
       | "venue"
       | "startDate"
       | "endDate"
+      | "tagsEnabled"
       | "tagPrimaryColor"
       | "tagSecondaryColor"
       | "tagFooterText"
@@ -162,6 +166,7 @@ export function toRegistrationUI(
     eventVenue: registration.event.venue,
     eventStartDate: registration.event.startDate.toISOString(),
     eventEndDate: registration.event.endDate.toISOString(),
+    tagsEnabled: registration.event.tagsEnabled,
     tagPrimaryColor: registration.event.tagPrimaryColor,
     tagSecondaryColor: registration.event.tagSecondaryColor,
     tagFooterText: registration.event.tagFooterText,

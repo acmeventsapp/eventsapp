@@ -301,7 +301,7 @@ export default function EventsList() {
                         <h3 className="min-w-0 text-base leading-snug wrap-break-word">
                           {eventItem.title}
                         </h3>
-                        <Badge variant="outline">{eventItem.status}</Badge>
+                        <Badge variant="secondary">{eventItem.status}</Badge>
                         <Badge>
                           {eventItem.isFree
                             ? "Free"

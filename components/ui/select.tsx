@@ -43,7 +43,7 @@ function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.V
 // Define size variants for SelectTrigger
 const selectTriggerVariants = cva(
   `
-    flex bg-accent w-full items-center justify-between outline-none border border-border shadow-xs shadow-black/5 transition-shadow 
+    flex bg-accent dark:bg-input/30 w-full items-center justify-between outline-none border border-border shadow-xs shadow-black/5 transition-shadow 
     text-foreground data-placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[2px] 
     focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 
     aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10 dark:aria-invalid:border-destructive dark:aria-invalid:ring-destructive/20
@@ -175,7 +175,7 @@ function SelectItem({ className, children, ...props }: React.ComponentProps<type
           <span
             className={cn(
               'absolute flex h-3.5 w-3.5 items-center justify-center',
-              indicatorPosition === 'left' ? 'start-2' : 'end-2',
+              indicatorPosition === 'left' ? 'inset-s-2' : 'inset-e-2',
             )}
           >
             <SelectPrimitive.ItemIndicator>
@@ -200,7 +200,7 @@ function SelectIndicator({
       data-slot="select-indicator"
       className={cn(
         'absolute flex top-1/2 -translate-y-1/2 items-center justify-center',
-        indicatorPosition === 'left' ? 'start-2' : 'end-2',
+        indicatorPosition === 'left' ? 'inset-s-2' : 'inset-e-2',
         className,
       )}
       {...props}

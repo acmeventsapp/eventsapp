@@ -83,15 +83,6 @@ export const FormFieldsSchema = z
       keys.add(key);
     }
 
-    const hasEmailField = fields.some((field) => field.fieldType === "EMAIL");
-    if (!hasEmailField) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Include at least one Email field for confirmations and payments",
-        path: [],
-      });
-    }
-
     for (const [index, field] of fields.entries()) {
       if (!field.dependsOn?.trim()) continue;
 

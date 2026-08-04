@@ -14,7 +14,7 @@ import BackButton from "@/components/custom/back-button";
 import { ImagePreview } from "@/components/custom/image-preview";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -58,63 +58,89 @@ function sortEvents(events: EventUI[], sortBy: SortOption) {
 
 function EventCard({ event, layout }: { event: EventUI; layout: LayoutMode }) {
   const isList = layout === "list";
+  const soldOut = event.remainingSeats <= 0;
 
   return (
     <Card
       className={cn(
-        "overflow-hidden",
-        isList && "flex flex-col sm:flex-row sm:items-stretch"
+        "group overflow-hidden transition-shadow hover:shadow-md",
+        isList ? "sm:flex sm:min-h-36" : "flex h-full flex-col"
       )}
     >
       {event.bannerImage ? (
-        <ImagePreview
-          src={event.bannerImage}
-          alt={`${event.title} flyer`}
+        <div
           className={cn(
-            "block shrink-0",
-            isList ? "h-44 w-full sm:h-auto sm:w-52" : "h-44 w-full"
-          )}
-        />
-      ) : null}
-
-      <div className={cn("flex flex-1 flex-col", isList && "min-w-0")}>
-        <CardHeader className={cn(isList && "pb-2")}>
-          <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className={cn(isList && "text-lg")}>{event.title}</CardTitle>
-            <Badge>
-              {event.isFree ? "Free" : formatCurrency(event.ticketPrice ?? 0)}
-            </Badge>
-          </div>
-        </CardHeader>
-
-        <CardContent
-          className={cn(
-            "flex flex-col gap-4",
-            isList && "flex-1 sm:flex-row sm:items-end sm:justify-between"
+            "relative shrink-0 overflow-hidden bg-muted",
+            isList ? "h-44 w-full sm:h-auto sm:w-44 sm:self-stretch" : "h-44 w-full"
           )}
         >
-          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+          <ImagePreview
+            src={event.bannerImage}
+            alt={`${event.title} flyer`}
+            className="block size-full"
+            imageClassName="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-4 p-4 sm:p-5",
+          isList
+            ? "sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+            : "h-full"
+        )}
+      >
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle className={cn("leading-snug", isList ? "text-lg" : "text-xl")}>
+              {event.title}
+            </CardTitle>
+            <Badge variant={event.isFree ? "secondary" : "primary"}>
+              {event.isFree ? "Free" : formatCurrency(event.ticketPrice ?? 0)}
+            </Badge>
+            {soldOut ? <Badge variant="outline">Sold out</Badge> : null}
+          </div>
+
+          {event.description ? (
+            <p
+              className={cn(
+                "text-sm text-muted-foreground",
+                isList ? "line-clamp-2" : "line-clamp-3"
+              )}
+            >
+              {event.description}
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-2">
-              <Calendar className="size-4 shrink-0" />
+              <Calendar className="size-4 shrink-0 text-primary/70" />
               {formatDate(event.startDate)}
             </span>
             <span className="inline-flex items-center gap-2">
-              <MapPin className="size-4 shrink-0" />
-              {event.venue}
+              <MapPin className="size-4 shrink-0 text-primary/70" />
+              <span className="truncate">{event.venue}</span>
             </span>
             <span className="inline-flex items-center gap-2">
-              <Users className="size-4 shrink-0" />
-              {event.remainingSeats} seats remaining
+              <Users className="size-4 shrink-0 text-primary/70" />
+              {soldOut
+                ? "No seats remaining"
+                : `${event.remainingSeats} seats remaining`}
             </span>
           </div>
+        </div>
 
-          <Link
-            href={`/events/${event.slug}`}
-            className={cn(buttonVariants(), "inline-flex w-fit shrink-0")}
-          >
-            View details
-          </Link>
-        </CardContent>
+        <Link
+          href={`/events/${event.slug}`}
+          className={cn(
+            buttonVariants(),
+            "inline-flex w-fit shrink-0",
+            isList ? "sm:self-center" : "mt-auto"
+          )}
+        >
+          View details
+        </Link>
       </div>
     </Card>
   );
@@ -197,7 +223,7 @@ export default function EventsListingPage() {
             {Array.from({ length: 4 }).map((_, index) => (
               <Skeleton
                 key={index}
-                className={cn("w-full", layout === "grid" ? "h-56" : "h-36")}
+                className={cn("w-full", layout === "grid" ? "h-56" : "h-40")}
               />
             ))}
           </div>

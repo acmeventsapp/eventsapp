@@ -61,10 +61,13 @@ function mapEventInput(data: EventFormValues) {
     isFree: data.isFree,
     ticketPrice: data.isFree ? null : data.ticketPrice,
     status: data.status,
+    tagsEnabled: data.tagsEnabled,
     tagPrimaryColor: data.tagPrimaryColor,
     tagSecondaryColor: data.tagSecondaryColor,
     tagFooterText: data.tagFooterText.trim() || null,
-    tagFieldKeys: sanitizeTagFieldKeys(data.tagFieldKeys, data.formFields),
+    tagFieldKeys: data.tagsEnabled
+      ? sanitizeTagFieldKeys(data.tagFieldKeys, data.formFields)
+      : Prisma.DbNull,
   };
 }
 

@@ -15,9 +15,11 @@ import {
   useZones,
 } from "@/hooks/use-organization";
 import type { ZoneUI } from "@/data/organization";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function ZoneManager() {
-  const { data: archdeaconry, isLoading: loadingArchdeaconry } = useArchdeaconry();
+  const { data: archdeaconry, isLoading: loadingArchdeaconry } =
+    useArchdeaconry();
   const { data: zones = [], isLoading } = useZones();
   const { mutateAsync: createZone, isLoading: isCreating } = useCreateZone();
   const { mutateAsync: updateZone, isLoading: isUpdating } = useUpdateZone();
@@ -96,47 +98,52 @@ export default function ZoneManager() {
             No zones yet. Add your first zone to begin organizing units.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Units</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {zones.map((zone) => (
-                  <tr key={zone.id} className="border-t">
-                    <td className="px-4 py-3">{zone.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {zone.unitCount}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => openEdit(zone)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setDeleteTarget(zone)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </td>
+          <ScrollArea className="w-full grid">
+            <div className=" rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Units</th>
+                    <th className="px-4 py-3 text-right font-medium">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {zones.map((zone) => (
+                    <tr key={zone.id} className="border-t">
+                      <td className="px-4 py-3">{zone.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {zone.unitCount}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openEdit(zone)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => setDeleteTarget(zone)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         )}
       </CardContent>
 

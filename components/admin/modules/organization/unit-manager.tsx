@@ -22,6 +22,7 @@ import {
   useZones,
 } from "@/hooks/use-organization";
 import type { UnitUI } from "@/data/organization";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ALL_ZONES = "__all__";
 
@@ -40,7 +41,7 @@ export default function UnitManager() {
 
   const parentOptions = useMemo(
     () => zones.map((zone) => ({ id: zone.id, name: zone.name })),
-    [zones]
+    [zones],
   );
 
   function openCreate() {
@@ -125,51 +126,56 @@ export default function UnitManager() {
             No units found for this filter.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Zone</th>
-                  <th className="px-4 py-3 font-medium">Branches</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {units.map((unit) => (
-                  <tr key={unit.id} className="border-t">
-                    <td className="px-4 py-3">{unit.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {unit.zoneName}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {unit.branchCount}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => openEdit(unit)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setDeleteTarget(unit)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </td>
+          <ScrollArea className="w-full grid">
+            <div className="rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Zone</th>
+                    <th className="px-4 py-3 font-medium">Branches</th>
+                    <th className="px-4 py-3 text-right font-medium">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {units.map((unit) => (
+                    <tr key={unit.id} className="border-t">
+                      <td className="px-4 py-3">{unit.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {unit.zoneName}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {unit.branchCount}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openEdit(unit)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setDeleteTarget(unit)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         )}
       </CardContent>
 
@@ -181,7 +187,7 @@ export default function UnitManager() {
         initialName={editing?.name ?? ""}
         initialParentId={
           editing?.zoneId ??
-          (zoneFilter !== ALL_ZONES ? zoneFilter : parentOptions[0]?.id ?? "")
+          (zoneFilter !== ALL_ZONES ? zoneFilter : (parentOptions[0]?.id ?? ""))
         }
         parentOptions={parentOptions}
         isSaving={isCreating || isUpdating}
