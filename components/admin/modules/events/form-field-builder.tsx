@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFieldArray, useFormContext, useFormState, type FieldErrors } from "react-hook-form";
+import { useFieldArray, useFormContext, useFormState, type FieldErrors, type FieldValues } from "react-hook-form";
 import { AlertCircle } from "lucide-react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -168,7 +168,7 @@ export default function FormFieldBuilder() {
     if (!fieldErrors || typeof fieldErrors !== "object") return [];
 
     return flattenFormErrors(
-      fieldErrors as FieldErrors<Record<string, unknown>>,
+      fieldErrors as FieldErrors<FieldValues>,
       `formFields.${index}`
     );
   }

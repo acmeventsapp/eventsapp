@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { FieldErrors, FieldPath } from "react-hook-form";
+import type { FieldErrors, FieldPath, FieldValues } from "react-hook-form";
 
 export type FlatFormError = {
   path: string;
@@ -8,8 +8,8 @@ export type FlatFormError = {
 
 const ERROR_META_KEYS = new Set(["message", "type", "ref", "types", "root"]);
 
-export function flattenFormErrors(
-  errors: FieldErrors<Record<string, unknown>> | undefined | null,
+export function flattenFormErrors<T extends FieldValues>(
+  errors: FieldErrors<T> | undefined | null,
   prefix = ""
 ): FlatFormError[] {
   if (!errors) return [];
@@ -33,7 +33,7 @@ export function flattenFormErrors(
         if (item && typeof item === "object") {
           result.push(
             ...flattenFormErrors(
-              item as FieldErrors<Record<string, unknown>>,
+              item as FieldErrors<FieldValues>,
               `${path}.${index}`
             )
           );
@@ -49,7 +49,7 @@ export function flattenFormErrors(
 
         result.push(
           ...flattenFormErrors(
-            nestedValue as FieldErrors<Record<string, unknown>>,
+            nestedValue as FieldErrors<FieldValues>,
             `${path}.${nestedKey}`
           )
         );
