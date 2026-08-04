@@ -314,7 +314,7 @@ export default function RegistrationsList() {
                       <h3 className="min-w-0 text-base leading-snug wrap-break-word">
                         {registration.contactName || registration.responsePreview}
                       </h3>
-                      <Badge variant="outline">{registration.status}</Badge>
+                      <Badge variant="secondary">{registration.status}</Badge>
                       <Badge>{registration.paymentStatus}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground wrap-break-word">
@@ -355,7 +355,7 @@ export default function RegistrationsList() {
                     </Button>
 
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => setSelectedRegistration(registration)}
                       className="w-full lg:w-auto"

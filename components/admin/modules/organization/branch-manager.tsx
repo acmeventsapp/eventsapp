@@ -22,6 +22,7 @@ import {
   useUpdateBranch,
 } from "@/hooks/use-organization";
 import type { BranchUI } from "@/data/organization";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ALL_UNITS = "__all__";
 
@@ -30,9 +31,12 @@ export default function BranchManager() {
   const [unitFilter, setUnitFilter] = useState(ALL_UNITS);
   const filterUnitId = unitFilter === ALL_UNITS ? undefined : unitFilter;
   const { data: branches = [], isLoading } = useBranches(filterUnitId);
-  const { mutateAsync: createBranch, isLoading: isCreating } = useCreateBranch();
-  const { mutateAsync: updateBranch, isLoading: isUpdating } = useUpdateBranch();
-  const { mutateAsync: deleteBranch, isLoading: isDeleting } = useDeleteBranch();
+  const { mutateAsync: createBranch, isLoading: isCreating } =
+    useCreateBranch();
+  const { mutateAsync: updateBranch, isLoading: isUpdating } =
+    useUpdateBranch();
+  const { mutateAsync: deleteBranch, isLoading: isDeleting } =
+    useDeleteBranch();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BranchUI | null>(null);
@@ -44,7 +48,7 @@ export default function BranchManager() {
         id: unit.id,
         name: `${unit.name} (${unit.zoneName})`,
       })),
-    [units]
+    [units],
   );
 
   function openCreate() {
@@ -129,51 +133,56 @@ export default function BranchManager() {
             No branches found for this filter.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Unit</th>
-                  <th className="px-4 py-3 font-medium">Zone</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {branches.map((branch) => (
-                  <tr key={branch.id} className="border-t">
-                    <td className="px-4 py-3">{branch.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {branch.unitName}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {branch.zoneName}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => openEdit(branch)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setDeleteTarget(branch)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </td>
+          <ScrollArea className="w-full grid">
+            <div className="rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Unit</th>
+                    <th className="px-4 py-3 font-medium">Zone</th>
+                    <th className="px-4 py-3 text-right font-medium">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {branches.map((branch) => (
+                    <tr key={branch.id} className="border-t">
+                      <td className="px-4 py-3">{branch.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {branch.unitName}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {branch.zoneName}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openEdit(branch)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setDeleteTarget(branch)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         )}
       </CardContent>
 
@@ -185,7 +194,7 @@ export default function BranchManager() {
         initialName={editing?.name ?? ""}
         initialParentId={
           editing?.unitId ??
-          (unitFilter !== ALL_UNITS ? unitFilter : parentOptions[0]?.id ?? "")
+          (unitFilter !== ALL_UNITS ? unitFilter : (parentOptions[0]?.id ?? ""))
         }
         parentOptions={parentOptions}
         isSaving={isCreating || isUpdating}

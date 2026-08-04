@@ -6,11 +6,12 @@ import ArchdeaconryForm from "@/components/admin/modules/organization/archdeacon
 import BranchManager from "@/components/admin/modules/organization/branch-manager";
 import UnitManager from "@/components/admin/modules/organization/unit-manager";
 import ZoneManager from "@/components/admin/modules/organization/zone-manager";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function OrganizationPage() {
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-2">
       <PageBreadcrumb />
       <PageHeader
         title="Organization"
@@ -18,12 +19,15 @@ export default function OrganizationPage() {
       />
 
       <Tabs defaultValue="archdeaconry" className="w-full">
-        <TabsList variant="line" className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="archdeaconry">Archdeaconry</TabsTrigger>
-          <TabsTrigger value="zones">Zones</TabsTrigger>
-          <TabsTrigger value="units">Units</TabsTrigger>
-          <TabsTrigger value="branches">Branches</TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full grid">
+          <TabsList variant="line" className="w-full justify-start">
+            <TabsTrigger value="archdeaconry">Archdeaconry</TabsTrigger>
+            <TabsTrigger value="zones">Zones</TabsTrigger>
+            <TabsTrigger value="units">Units</TabsTrigger>
+            <TabsTrigger value="branches">Branches</TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         <TabsContent value="archdeaconry">
           <ArchdeaconryForm />

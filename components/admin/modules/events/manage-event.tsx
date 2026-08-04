@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useForm, type FieldPath } from "react-hook-form";
+import { useForm, useFormState, type FieldErrors, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +45,13 @@ import {
   fromDateTimeLocalValue,
   toDateTimeLocalValue,
 } from "@/lib/datetime-local";
+import {
+  findStepForErrorPath,
+  flattenFormErrors,
+  formatFormErrorPath,
+  getSchemaErrorsForFields,
+  getStepValidationFields,
+} from "@/lib/form-errors";
 import { slugify } from "@/lib/utils";
 import {
   EventSchema,
@@ -80,7 +87,7 @@ const FORM_STEPS: ReadonlyArray<{
   {
     id: "registration",
     label: "Registration",
-    fields: ["isFree", "ticketPrice", "tagPrimaryColor", "tagSecondaryColor", "tagFooterText", "tagFieldKeys", "formFields"],
+    fields: ["isFree", "ticketPrice", "tagsEnabled", "tagPrimaryColor", "tagSecondaryColor", "tagFooterText", "tagFieldKeys", "formFields"],
   },
   {
     id: "speakers",
@@ -108,6 +115,10 @@ export default function ManageEventForm({
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(EventSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+    criteriaMode: "all",
     defaultValues: {
       title: event?.title ?? "",
       slug: event?.slug ?? "",
@@ -124,6 +135,7 @@ export default function ManageEventForm({
       isFree: event?.isFree ?? false,
       ticketPrice: event?.ticketPrice ?? 0,
       status: event?.status ?? "DRAFT",
+      tagsEnabled: event?.tagsEnabled ?? true,
       tagPrimaryColor: event?.tagPrimaryColor ?? DEFAULT_TAG_PRIMARY_COLOR,
       tagSecondaryColor: event?.tagSecondaryColor ?? DEFAULT_TAG_SECONDARY_COLOR,
       tagFooterText: event?.tagFooterText ?? "",
@@ -178,7 +190,9 @@ export default function ManageEventForm({
 
   const slugManuallyEdited = useRef(Boolean(event));
   const [activeTab, setActiveTab] = useState<FormStepId>("details");
+  const { errors } = useFormState({ control: form.control });
   const isFree = form.watch("isFree");
+  const tagsEnabled = form.watch("tagsEnabled");
   const isLoading = isCreating || isUpdating;
   const currentStepIndex = FORM_STEPS.findIndex(
     (step) => step.id === activeTab,
@@ -188,10 +202,21 @@ export default function ManageEventForm({
 
   async function validateCurrentStep() {
     const step = FORM_STEPS[currentStepIndex];
-    const valid = await form.trigger(step.fields);
+    const fields = getStepValidationFields(
+      step.fields,
+      step.id,
+      form.getValues("tagsEnabled")
+    ) as FieldPath<EventFormValues>[];
+    const valid = await form.trigger(fields, { shouldFocus: true });
 
     if (!valid) {
-      toast.error("Please fix the errors before continuing");
+      const schemaErrors = getSchemaErrorsForFields(
+        EventSchema,
+        form.getValues(),
+        fields
+      );
+      const firstError = schemaErrors[0];
+      toast.error(firstError?.message ?? "Please fix the errors before continuing");
       return false;
     }
 
@@ -248,6 +273,32 @@ export default function ManageEventForm({
       setActiveTab(value as FormStepId);
     }
   }
+
+  function handleInvalidSubmit(errors: FieldErrors<EventFormValues>) {
+    const flatErrors = flattenFormErrors(errors);
+    const firstError = flatErrors[0];
+    const errorStep = firstError
+      ? findStepForErrorPath(firstError.path, FORM_STEPS)
+      : null;
+
+    if (errorStep) {
+      setActiveTab(errorStep);
+    }
+
+    toast.error(firstError?.message ?? "Please fix the errors before saving");
+  }
+
+  const validationErrors = flattenFormErrors(errors);
+
+  const registrationStepErrors = validationErrors.filter(
+    (error) =>
+      error.path === "formFields" ||
+      error.path.startsWith("formFields.") ||
+      error.path === "isFree" ||
+      error.path === "ticketPrice" ||
+      error.path === "tagsEnabled" ||
+      error.path.startsWith("tag")
+  );
 
   async function onSubmit(values: EventFormValues) {
     try {
@@ -311,17 +362,37 @@ export default function ManageEventForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, () => {
-          toast.error("Please fix the errors before saving");
-        })}
+        onSubmit={form.handleSubmit(onSubmit, handleInvalidSubmit)}
         className="flex flex-col gap-6"
       >
+        {validationErrors.length > 0 ? (
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/40 bg-destructive/5 p-4"
+          >
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-destructive">
+              <AlertCircle className="size-4 shrink-0" />
+              Fix the following before saving
+            </div>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-destructive">
+              {validationErrors.map((error) => (
+                <li key={`${error.path}:${error.message}`}>
+                  <span className="font-medium">
+                    {formatFormErrorPath(error.path)}:
+                  </span>{" "}
+                  {error.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <ScrollArea className="">
+          <ScrollArea className="w-full grid">
             <TabsList variant="line" className="w-full justify-start">
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="schedule">Schedule</TabsTrigger>
@@ -519,6 +590,28 @@ export default function ManageEventForm({
             value="registration"
             className="mt-4 flex flex-col gap-4"
           >
+            {registrationStepErrors.length > 0 ? (
+              <div
+                role="alert"
+                className="rounded-xl border border-destructive/40 bg-destructive/5 p-4"
+              >
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-destructive">
+                  <AlertCircle className="size-4 shrink-0" />
+                  Fix these registration issues
+                </div>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-destructive">
+                  {registrationStepErrors.map((error) => (
+                    <li key={`${error.path}:${error.message}`}>
+                      <span className="font-medium">
+                        {formatFormErrorPath(error.path)}:
+                      </span>{" "}
+                      {error.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
             <FormField
               control={form.control}
               name="isFree"
@@ -557,6 +650,36 @@ export default function ManageEventForm({
               />
             ) : null}
 
+            <FormField
+              control={form.control}
+              name="tagsEnabled"
+              render={({ field }) => (
+                <FormItem className="rounded-xl border p-4">
+                  <div className="flex flex-row items-start gap-3">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                      />
+                    </FormControl>
+                    <div className="space-y-1">
+                      <FormLabel>Enable printable name tags</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Turn this off for events that do not need registration
+                        tags. Tag theme and field selection will be hidden.
+                      </p>
+                    </div>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormFieldBuilder />
+
+            {tagsEnabled ? (
+              <>
             <div className="rounded-xl border p-4">
               <div className="mb-4">
                 <h3 className="text-base text-primary">Name tag theme</h3>
@@ -626,9 +749,9 @@ export default function ManageEventForm({
               />
             </div>
 
-            <FormFieldBuilder />
-
             <TagFieldSelector />
+              </>
+            ) : null}
 
             <StepActions />
           </TabsContent>

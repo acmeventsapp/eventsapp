@@ -38,6 +38,10 @@ export function getParticipantName(registration: RegistrationUI) {
 }
 
 export function canPrintRegistrationTag(registration: RegistrationUI) {
+  if (!registration.tagsEnabled) {
+    return false;
+  }
+
   if (
     registration.status !== "CONFIRMED" &&
     registration.status !== "ATTENDED"

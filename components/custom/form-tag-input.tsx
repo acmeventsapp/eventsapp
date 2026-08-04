@@ -64,7 +64,7 @@ export default function FormTagInput({
           input: cn(inputVariants({ variant: "lg" }), "min-w-0 w-full"),
           tag: {
             body: cn(
-              badgeVariants({ variant: "outline" }),
+              badgeVariants({ variant: "secondary" }),
               "flex h-auto min-h-7 w-full max-w-full items-start justify-between gap-2 whitespace-normal wrap-break-word py-1.5 text-left leading-snug [&>button]:shrink-0"
             ),
             closeButton: cn(

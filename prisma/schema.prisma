@@ -113,6 +113,7 @@ model Event {
   isFree        Boolean             @default(false)
   ticketPrice   Decimal?            @db.Decimal(10, 2)
   status        EventStatus         @default(DRAFT)
+  tagsEnabled       Boolean         @default(true)
   tagPrimaryColor   String          @default("#4a3428")
   tagSecondaryColor String          @default("#f5f0e8")
   tagFooterText     String?

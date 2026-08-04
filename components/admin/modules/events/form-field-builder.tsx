@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useFormState, type FieldErrors } from "react-hook-form";
+import { AlertCircle } from "lucide-react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,6 +31,8 @@ import {
 } from "@/lib/form-fields";
 import type { EventFormValues } from "@/validators/schemas/event";
 import type { FormFieldType } from "@prisma/client";
+import { flattenFormErrors, type FlatFormError } from "@/lib/form-errors";
+import { cn } from "@/lib/utils";
 
 const FIELD_TYPES = Object.keys(FORM_FIELD_TYPE_LABELS) as FormFieldType[];
 const NONE_DEPENDENCY_VALUE = "__none__";
@@ -87,6 +90,7 @@ function ConditionalOptionsEditor({
 
 export default function FormFieldBuilder() {
   const form = useFormContext<EventFormValues>();
+  const { errors } = useFormState({ control: form.control });
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: "formFields",
@@ -159,6 +163,23 @@ export default function FormFieldBuilder() {
     return next;
   }
 
+  function getFieldErrors(index: number): FlatFormError[] {
+    const fieldErrors = errors.formFields?.[index];
+    if (!fieldErrors || typeof fieldErrors !== "object") return [];
+
+    return flattenFormErrors(
+      fieldErrors as FieldErrors<Record<string, unknown>>,
+      `formFields.${index}`
+    );
+  }
+
+  const formFieldsRootMessage =
+    typeof errors.formFields?.message === "string"
+      ? errors.formFields.message
+      : typeof errors.formFields?.root?.message === "string"
+        ? errors.formFields.root.message
+        : null;
+
   return (
     <div className="flex flex-col gap-4 rounded-xl border p-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -172,6 +193,15 @@ export default function FormFieldBuilder() {
           Restore defaults
         </Button>
       </div>
+
+      {formFieldsRootMessage ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+        >
+          {formFieldsRootMessage}
+        </p>
+      ) : null}
 
       {fields.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
@@ -189,12 +219,35 @@ export default function FormFieldBuilder() {
             ? (watchedFormFields ?? []).find((item) => item.fieldKey === dependsOn)
             : null;
           const parentOptions = normalizeFieldOptions(selectedParent?.options ?? []);
+          const fieldErrors = getFieldErrors(index);
 
           return (
             <div
               key={field.id}
-              className="flex min-w-0 flex-col gap-3 overflow-hidden rounded-lg border p-4"
+              className={cn(
+                "flex min-w-0 flex-col gap-3 overflow-hidden rounded-lg border p-4",
+                fieldErrors.length > 0 && "border-destructive/60 bg-destructive/5"
+              )}
             >
+              {fieldErrors.length > 0 ? (
+                <div
+                  role="alert"
+                  className="rounded-lg border border-destructive/30 bg-background px-3 py-2 text-sm text-destructive"
+                >
+                  <div className="mb-1 flex items-center gap-2 font-medium">
+                    <AlertCircle className="size-4 shrink-0" />
+                    This field has errors
+                  </div>
+                  <ul className="list-disc space-y-1 pl-5">
+                    {fieldErrors.map((error) => (
+                      <li key={`${error.path}:${error.message}`}>
+                        {error.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-base text-primary">Field {index + 1}</h3>
                 <div className="flex items-center gap-1">
@@ -218,7 +271,7 @@ export default function FormFieldBuilder() {
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="destructive"
                     size="icon"
                     onClick={() => remove(index)}
                   >
@@ -448,8 +501,9 @@ export default function FormFieldBuilder() {
                     appear when it is selected.
                   </p>
                   <FormMessage>
-                    {form.formState.errors.formFields?.[index]?.conditionalOptions
-                      ?.message as string | undefined}
+                    {errors.formFields?.[index]?.conditionalOptions?.message as
+                      | string
+                      | undefined}
                   </FormMessage>
                 </FormItem>
               ) : null}
@@ -475,12 +529,6 @@ export default function FormFieldBuilder() {
           );
         })
       )}
-
-      {form.formState.errors.formFields?.message ? (
-        <p className="text-sm text-destructive">
-          {form.formState.errors.formFields.message}
-        </p>
-      ) : null}
 
       <Button
         type="button"

@@ -94,6 +94,28 @@ export default function EventReprintTagPage({ slug }: { slug: string }) {
     );
   }
 
+  if (!event.tagsEnabled) {
+    return (
+      <PublicLayoutShell>
+        <div className="mx-auto max-w-xl px-4 py-10">
+          <Card>
+            <CardContent className="py-10 text-center">
+              <p className="mb-4">
+                Name tags are not available for this event.
+              </p>
+              <Link
+                href={`/events/${slug}`}
+                className={cn(buttonVariants(), "inline-flex")}
+              >
+                Back to event
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </PublicLayoutShell>
+    );
+  }
+
   const canDownload = registration && canPrintRegistrationTag(registration);
 
   return (

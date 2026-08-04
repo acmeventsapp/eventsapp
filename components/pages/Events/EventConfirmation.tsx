@@ -141,15 +141,17 @@ export default function EventConfirmationPage({
                 >
                   Back to event
                 </Link>
-                <Link
-                  href={`/events/${slug}/reprint`}
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "inline-flex",
-                  )}
-                >
-                  Reprint tag later
-                </Link>
+                {registration?.tagsEnabled ? (
+                  <Link
+                    href={`/events/${slug}/reprint`}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "inline-flex",
+                    )}
+                  >
+                    Reprint tag later
+                  </Link>
+                ) : null}
                 <Link
                   href="/events"
                   className={cn(

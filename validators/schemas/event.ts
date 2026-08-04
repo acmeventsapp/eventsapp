@@ -19,6 +19,7 @@ export type EventFormValues = {
   capacity: number;
   isFree: boolean;
   ticketPrice: number;
+  tagsEnabled: boolean;
   tagPrimaryColor: string;
   tagSecondaryColor: string;
   tagFooterText: string;
@@ -42,12 +43,9 @@ export const EventSchema = z
     isFree: z.boolean(),
     ticketPrice: z.number().min(0),
     status: EventStatusEnum,
-    tagPrimaryColor: z
-      .string()
-      .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color"),
-    tagSecondaryColor: z
-      .string()
-      .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color"),
+    tagsEnabled: z.boolean(),
+    tagPrimaryColor: z.string(),
+    tagSecondaryColor: z.string(),
     tagFooterText: z.string(),
     tagFieldKeys: z.array(z.string()),
     formFields: FormFieldsSchema,
@@ -61,6 +59,27 @@ export const EventSchema = z
   .refine(
     (data) => data.isFree || data.ticketPrice > 0,
     { message: "Ticket price is required for paid events", path: ["ticketPrice"] }
+  )
+  .refine(
+    (data) =>
+      data.isFree ||
+      data.formFields.some((field) => field.fieldType === "EMAIL"),
+    {
+      message: "Include at least one Email field for confirmations and payments",
+      path: ["formFields"],
+    }
+  )
+  .refine(
+    (data) =>
+      !data.tagsEnabled ||
+      /^#[0-9A-Fa-f]{6}$/.test(data.tagPrimaryColor),
+    { message: "Enter a valid hex color", path: ["tagPrimaryColor"] }
+  )
+  .refine(
+    (data) =>
+      !data.tagsEnabled ||
+      /^#[0-9A-Fa-f]{6}$/.test(data.tagSecondaryColor),
+    { message: "Enter a valid hex color", path: ["tagSecondaryColor"] }
   );
 
 export function toInt(value: unknown, fallback = 0): number {
