@@ -121,6 +121,7 @@ model Event {
   formFields        EventFormField[]
   speakers          EventSpeaker[]
   assignmentGroups  EventAssignmentGroup[]
+  hostels           EventHostel[]
   registrations     EventRegistration[]
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
@@ -163,11 +164,27 @@ model EventSpeaker {
 }
 
 model EventAssignmentGroup {
+  id               String              @id @default(cuid())
+  eventId          String
+  event            Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name             String
+  capacity         Int                 @default(0)
+  targetFieldKey   String?
+  targetFieldValue String?
+  sortOrder        Int                 @default(0)
+  registrations    EventRegistration[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([eventId, sortOrder])
+}
+
+model EventHostel {
   id            String              @id @default(cuid())
   eventId       String
   event         Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name          String
-  capacity      Int                 @default(0)
+  branchIds     Json
   sortOrder     Int                 @default(0)
   registrations EventRegistration[]
   createdAt     DateTime            @default(now())
@@ -182,6 +199,8 @@ model EventRegistration {
   event              Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
   assignmentGroupId  String?
   assignmentGroup    EventAssignmentGroup? @relation(fields: [assignmentGroupId], references: [id], onDelete: SetNull)
+  hostelId           String?
+  hostel             EventHostel?          @relation(fields: [hostelId], references: [id], onDelete: SetNull)
   responses          Json
   contactEmail       String?
   contactName        String?
@@ -195,6 +214,7 @@ model EventRegistration {
   @@index([eventId])
   @@index([contactEmail])
   @@index([assignmentGroupId])
+  @@index([hostelId])
 }
 
 model PaymentSettings {

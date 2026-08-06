@@ -1,4 +1,11 @@
-import type { Event, EventAssignmentGroup, EventFormField, EventRegistration, EventSpeaker } from "@prisma/client";
+import type {
+  Event,
+  EventAssignmentGroup,
+  EventFormField,
+  EventHostel,
+  EventRegistration,
+  EventSpeaker,
+} from "@prisma/client";
 import { formatResponseValue, getResponsePreview } from "@/lib/form-fields";
 import { getPhotoUrlFromResponses } from "@/lib/name-tag";
 import { parseTagFieldKeys } from "@/lib/tag-fields";
@@ -15,6 +22,15 @@ export interface AssignmentGroupUI {
   id: string;
   name: string;
   capacity: number;
+  targetFieldKey: string | null;
+  targetFieldValue: string | null;
+  sortOrder: number;
+}
+
+export interface EventHostelUI {
+  id: string;
+  name: string;
+  branchIds: string[];
   sortOrder: number;
 }
 
@@ -23,6 +39,7 @@ export type EventWithCounts = Event & {
   formFields?: EventFormField[];
   speakers?: EventSpeaker[];
   assignmentGroups?: EventAssignmentGroup[];
+  hostels?: EventHostel[];
 };
 
 export interface EventUI {
@@ -43,6 +60,7 @@ export interface EventUI {
   formFields: FormFieldUI[];
   speakers: EventSpeakerUI[];
   assignmentGroups: AssignmentGroupUI[];
+  hostels: EventHostelUI[];
   tagsEnabled: boolean;
   tagPrimaryColor: string;
   tagSecondaryColor: string;
@@ -73,6 +91,7 @@ export interface RegistrationUI {
   labeledResponses: Array<{ fieldKey: string; label: string; value: string }>;
   responsePreview: string;
   assignedGroup: string | null;
+  assignedHostel: string | null;
   status: EventRegistration["status"];
   paymentRef: string | null;
   paymentStatus: EventRegistration["paymentStatus"];
@@ -80,12 +99,28 @@ export interface RegistrationUI {
   createdAt: string;
 }
 
+function parseBranchIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
 export function toAssignmentGroupUI(group: EventAssignmentGroup): AssignmentGroupUI {
   return {
     id: group.id,
     name: group.name,
     capacity: group.capacity,
+    targetFieldKey: group.targetFieldKey,
+    targetFieldValue: group.targetFieldValue,
     sortOrder: group.sortOrder,
+  };
+}
+
+export function toEventHostelUI(hostel: EventHostel): EventHostelUI {
+  return {
+    id: hostel.id,
+    name: hostel.name,
+    branchIds: parseBranchIds(hostel.branchIds),
+    sortOrder: hostel.sortOrder,
   };
 }
 
@@ -103,6 +138,10 @@ export function toEventUI(event: EventWithCounts): EventUI {
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(toAssignmentGroupUI);
+  const hostels = (event.hostels ?? [])
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map(toEventHostelUI);
 
   return {
     id: event.id,
@@ -122,6 +161,7 @@ export function toEventUI(event: EventWithCounts): EventUI {
     formFields,
     speakers,
     assignmentGroups,
+    hostels,
     tagsEnabled: event.tagsEnabled,
     tagPrimaryColor: event.tagPrimaryColor,
     tagSecondaryColor: event.tagSecondaryColor,
@@ -150,6 +190,7 @@ export function toRegistrationUI(
       formFields?: EventFormField[];
     };
     assignmentGroup?: { name: string } | null;
+    hostel?: { name: string } | null;
   }
 ): RegistrationUI {
   const responses = (registration.responses ?? {}) as RegistrationResponses;
@@ -183,6 +224,7 @@ export function toRegistrationUI(
     })),
     responsePreview: getResponsePreview(formFields, responses),
     assignedGroup: registration.assignmentGroup?.name ?? null,
+    assignedHostel: registration.hostel?.name ?? null,
     status: registration.status,
     paymentRef: registration.paymentRef,
     paymentStatus: registration.paymentStatus,

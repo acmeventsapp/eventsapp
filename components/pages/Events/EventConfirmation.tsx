@@ -116,12 +116,20 @@ export default function EventConfirmationPage({
                     ))}
                   </div>
 
-                  {registration.assignedGroup ? (
-                    <div className="border-t pt-3">
-                      <p>
-                        <strong>Assigned group:</strong>{" "}
-                        {registration.assignedGroup}
-                      </p>
+                  {registration.assignedGroup || registration.assignedHostel ? (
+                    <div className="border-t pt-3 space-y-1">
+                      {registration.assignedGroup ? (
+                        <p>
+                          <strong>Assigned group:</strong>{" "}
+                          {registration.assignedGroup}
+                        </p>
+                      ) : null}
+                      {registration.assignedHostel ? (
+                        <p>
+                          <strong>Assigned hostel:</strong>{" "}
+                          {registration.assignedHostel}
+                        </p>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

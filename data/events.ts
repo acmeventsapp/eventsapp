@@ -22,6 +22,9 @@ const eventInclude = {
   assignmentGroups: {
     orderBy: { sortOrder: "asc" as const },
   },
+  hostels: {
+    orderBy: { sortOrder: "asc" as const },
+  },
 };
 
 function mapFormFields(formFields: EventFormValues["formFields"]) {
@@ -76,9 +79,10 @@ function toEventWithCount(event: {
   formFields: Parameters<typeof toEventUI>[0]["formFields"];
   speakers: Parameters<typeof toEventUI>[0]["speakers"];
   assignmentGroups: Parameters<typeof toEventUI>[0]["assignmentGroups"];
+  hostels: Parameters<typeof toEventUI>[0]["hostels"];
 } & Omit<
   Parameters<typeof toEventUI>[0],
-  "_count" | "formFields" | "speakers" | "assignmentGroups"
+  "_count" | "formFields" | "speakers" | "assignmentGroups" | "hostels"
 >) {
   return toEventUI({
     ...event,
@@ -86,6 +90,7 @@ function toEventWithCount(event: {
     formFields: event.formFields,
     speakers: event.speakers,
     assignmentGroups: event.assignmentGroups,
+    hostels: event.hostels,
   });
 }
 
@@ -165,6 +170,8 @@ function mapAssignmentGroups(assignmentGroups: EventFormValues["assignmentGroups
   return assignmentGroups.map((group, index) => ({
     name: group.name.trim(),
     capacity: group.capacity,
+    targetFieldKey: group.targetFieldKey?.trim() || null,
+    targetFieldValue: group.targetFieldValue?.trim() || null,
     sortOrder: index,
   }));
 }
@@ -195,6 +202,45 @@ async function syncEventAssignmentGroups(
       data: {
         eventId,
         ...group,
+      },
+    });
+  }
+}
+
+function mapHostels(hostels: EventFormValues["hostels"]) {
+  return hostels.map((hostel, index) => ({
+    name: hostel.name.trim(),
+    branchIds: hostel.branchIds,
+    sortOrder: index,
+  }));
+}
+
+async function syncEventHostels(
+  eventId: string,
+  hostels: EventFormValues["hostels"]
+) {
+  const mappedHostels = mapHostels(hostels);
+  const keepIds = hostels.map((hostel) => hostel.id).filter(Boolean) as string[];
+
+  await prisma.eventHostel.deleteMany({
+    where: keepIds.length ? { eventId, id: { notIn: keepIds } } : { eventId },
+  });
+
+  for (const [index, hostel] of mappedHostels.entries()) {
+    const sourceHostel = hostels[index];
+
+    if (sourceHostel?.id) {
+      await prisma.eventHostel.update({
+        where: { id: sourceHostel.id },
+        data: hostel,
+      });
+      continue;
+    }
+
+    await prisma.eventHostel.create({
+      data: {
+        eventId,
+        ...hostel,
       },
     });
   }
@@ -253,6 +299,9 @@ export async function createEvent(data: EventFormValues) {
         assignmentGroups: {
           create: mapAssignmentGroups(data.assignmentGroups),
         },
+        hostels: {
+          create: mapHostels(data.hostels),
+        },
       },
       include: eventInclude,
     });
@@ -275,6 +324,7 @@ export async function updateEvent(id: string, data: EventFormValues) {
     await syncEventFormFields(id, data.formFields);
     await syncEventSpeakers(id, data.speakers);
     await syncEventAssignmentGroups(id, data.assignmentGroups);
+    await syncEventHostels(id, data.hostels);
 
     const refreshed = await prisma.event.findUnique({
       where: { id },

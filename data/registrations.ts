@@ -1,6 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import {
+  getBranchIdFromResponses,
+  matchesAssignmentGroupFilter,
+  parseHostelBranchIds,
+} from "@/lib/assignments";
 import { extractContactFromResponses } from "@/lib/form-fields";
 import {
   buildRegistrationConfirmationEmail,
@@ -47,6 +52,9 @@ const registrationInclude = {
   assignmentGroup: {
     select: { name: true },
   },
+  hostel: {
+    select: { name: true },
+  },
 };
 
 type TransactionClient = Omit<
@@ -57,14 +65,19 @@ type TransactionClient = Omit<
 async function assignToGroup(
   tx: TransactionClient,
   eventId: string,
-  registrationId: string
+  registrationId: string,
+  responses: RegistrationResponses
 ): Promise<string | null> {
   const groups = await tx.eventAssignmentGroup.findMany({
     where: { eventId },
     orderBy: { sortOrder: "asc" },
   });
 
-  if (groups.length === 0) {
+  const eligibleGroups = groups.filter((group) =>
+    matchesAssignmentGroupFilter(responses, group)
+  );
+
+  if (eligibleGroups.length === 0) {
     return null;
   }
 
@@ -82,7 +95,7 @@ async function assignToGroup(
     counts.map((entry) => [entry.assignmentGroupId, entry._count.id])
   );
 
-  const availableGroups = groups.filter((group) => {
+  const availableGroups = eligibleGroups.filter((group) => {
     if (group.capacity === 0) return true;
     const currentCount = countByGroupId.get(group.id) ?? 0;
     return currentCount < group.capacity;
@@ -101,6 +114,63 @@ async function assignToGroup(
   });
 
   return selectedGroup.name;
+}
+
+async function assignToHostel(
+  tx: TransactionClient,
+  eventId: string,
+  registrationId: string,
+  responses: RegistrationResponses,
+  formFields: Array<{ fieldType: string; fieldKey: string }>
+): Promise<string | null> {
+  const branchId = getBranchIdFromResponses(responses, formFields);
+  if (!branchId) {
+    return null;
+  }
+
+  const hostels = await tx.eventHostel.findMany({
+    where: { eventId },
+    orderBy: { sortOrder: "asc" },
+  });
+
+  const matchedHostel = hostels.find((hostel) =>
+    parseHostelBranchIds(hostel.branchIds).includes(branchId)
+  );
+
+  if (!matchedHostel) {
+    return null;
+  }
+
+  await tx.eventRegistration.update({
+    where: { id: registrationId },
+    data: { hostelId: matchedHostel.id },
+  });
+
+  return matchedHostel.name;
+}
+
+async function assignRegistrant(
+  tx: TransactionClient,
+  eventId: string,
+  registrationId: string,
+  responses: RegistrationResponses,
+  formFields: Array<{ fieldType: string; fieldKey: string }>
+) {
+  const assignedGroup = await assignToGroup(
+    tx,
+    eventId,
+    registrationId,
+    responses
+  );
+  const assignedHostel = await assignToHostel(
+    tx,
+    eventId,
+    registrationId,
+    responses,
+    formFields
+  );
+
+  return { assignedGroup, assignedHostel };
 }
 
 export async function getRegistrations(filters?: {
@@ -245,6 +315,7 @@ export async function createRegistration(input: CreateRegistrationInput) {
     const status = event.isFree ? "CONFIRMED" : "PENDING";
 
     let assignedGroup: string | null = null;
+    let assignedHostel: string | null = null;
 
     const registration = await prisma.$transaction(async (tx) => {
       const created = await tx.eventRegistration.create({
@@ -261,7 +332,15 @@ export async function createRegistration(input: CreateRegistrationInput) {
       });
 
       if (event.isFree) {
-        assignedGroup = await assignToGroup(tx, event.id, created.id);
+        const assignments = await assignRegistrant(
+          tx,
+          event.id,
+          created.id,
+          responses as RegistrationResponses,
+          event.formFields
+        );
+        assignedGroup = assignments.assignedGroup;
+        assignedHostel = assignments.assignedHostel;
       }
 
       return tx.eventRegistration.findUniqueOrThrow({
@@ -284,6 +363,7 @@ export async function createRegistration(input: CreateRegistrationInput) {
           amount: formatCurrency(0),
           isPaid: false,
           assignedGroup,
+          assignedHostel,
           responses,
           formFields,
           reprintUrl: event.tagsEnabled
@@ -317,6 +397,7 @@ export async function updateRegistrationStatus(
       data.status === "CONFIRMED" && data.paymentStatus === "PAID";
 
     let assignedGroup: string | null = null;
+    let assignedHostel: string | null = null;
 
     const registration = await prisma.$transaction(async (tx) => {
       const updated = await tx.eventRegistration.update({
@@ -326,10 +407,17 @@ export async function updateRegistrationStatus(
       });
 
       if (shouldAssign) {
-        assignedGroup = await assignToGroup(tx, updated.eventId, updated.id);
-      }
+        const responses = updated.responses as RegistrationResponses;
+        const assignments = await assignRegistrant(
+          tx,
+          updated.eventId,
+          updated.id,
+          responses,
+          updated.event.formFields ?? []
+        );
+        assignedGroup = assignments.assignedGroup;
+        assignedHostel = assignments.assignedHostel;
 
-      if (shouldAssign && assignedGroup) {
         return tx.eventRegistration.findUniqueOrThrow({
           where: { id: updated.id },
           include: registrationInclude,
@@ -356,6 +444,7 @@ export async function updateRegistrationStatus(
           amount: formatCurrency(Number(registration.amount)),
           isPaid: true,
           assignedGroup: assignedGroup ?? registration.assignmentGroup?.name ?? null,
+          assignedHostel: assignedHostel ?? registration.hostel?.name ?? null,
           responses,
           formFields,
           reprintUrl: registration.event.tagsEnabled
@@ -417,6 +506,9 @@ export async function getRegistrationWithEvent(id: string) {
     where: { id },
     include: {
       assignmentGroup: {
+        select: { name: true },
+      },
+      hostel: {
         select: { name: true },
       },
       event: {

@@ -104,6 +104,7 @@ const FIELD_LABELS: Record<string, string> = {
   formFields: "Registration fields",
   speakers: "Speakers",
   assignmentGroups: "Assignment groups",
+  hostels: "Hostels",
   status: "Status",
 };
 
