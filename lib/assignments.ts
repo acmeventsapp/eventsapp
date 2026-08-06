@@ -46,3 +46,66 @@ export function parseHostelBranchIds(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string");
 }
+
+export function normalizeGenderValue(value: string): "MALE" | "FEMALE" | null {
+  const normalized = value.trim().toLowerCase();
+
+  if (!normalized) return null;
+  if (/^female|girl|woman/.test(normalized) || normalized === "f") {
+    return "FEMALE";
+  }
+  if (/^male|boy|man/.test(normalized) || normalized === "m") {
+    return "MALE";
+  }
+  if (normalized.includes("female")) return "FEMALE";
+  if (normalized.includes("male")) return "MALE";
+
+  return null;
+}
+
+export function getRegistrantGender(
+  responses: RegistrationResponses,
+  formFields: Array<{ fieldType: string; fieldKey: string; label: string }>
+): "MALE" | "FEMALE" | null {
+  for (const field of formFields) {
+    const isGenderField =
+      /gender|sex/i.test(field.fieldKey) || /gender|sex/i.test(field.label);
+
+    if (!isGenderField) continue;
+
+    const gender = normalizeGenderValue(
+      normalizeResponseValue(responses[field.fieldKey])
+    );
+    if (gender) return gender;
+  }
+
+  return null;
+}
+
+export function findHostelForRegistrant(
+  hostels: Array<{
+    id: string;
+    name: string;
+    gender: "MALE" | "FEMALE";
+    branchIds: unknown;
+  }>,
+  branchId: string,
+  registrantGender: "MALE" | "FEMALE" | null
+) {
+  const matchingHostels = hostels.filter((hostel) =>
+    parseHostelBranchIds(hostel.branchIds).includes(branchId)
+  );
+
+  if (matchingHostels.length === 0) {
+    return null;
+  }
+
+  if (registrantGender) {
+    return (
+      matchingHostels.find((hostel) => hostel.gender === registrantGender) ??
+      null
+    );
+  }
+
+  return matchingHostels.length === 1 ? matchingHostels[0] : null;
+}

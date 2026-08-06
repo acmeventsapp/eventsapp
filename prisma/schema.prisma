@@ -30,6 +30,11 @@ enum PaymentStatus {
   FREE
 }
 
+enum HostelGender {
+  MALE
+  FEMALE
+}
+
 enum FormFieldType {
   TEXT
   TEXTAREA
@@ -184,6 +189,7 @@ model EventHostel {
   eventId       String
   event         Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name          String
+  gender        HostelGender
   branchIds     Json
   sortOrder     Int                 @default(0)
   registrations EventRegistration[]

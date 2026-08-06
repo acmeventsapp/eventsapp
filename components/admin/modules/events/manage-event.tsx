@@ -192,6 +192,7 @@ export default function ManageEventForm({
         event?.hostels.map((hostel) => ({
           id: hostel.id,
           name: hostel.name,
+          gender: hostel.gender,
           branchIds: hostel.branchIds,
           sortOrder: hostel.sortOrder,
         })) ?? [],
