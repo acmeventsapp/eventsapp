@@ -45,6 +45,7 @@ export function buildRegistrationConfirmationEmail(params: {
   responses?: RegistrationResponses;
   formFields?: FormFieldUI[];
   assignedGroup?: string | null;
+  assignedHostel?: string | null;
   reprintUrl?: string;
 }) {
   const paymentLine = params.isPaid
@@ -53,6 +54,10 @@ export function buildRegistrationConfirmationEmail(params: {
 
   const assignmentLine = params.assignedGroup
     ? `<p><strong>Assigned group:</strong> ${params.assignedGroup}</p>`
+    : "";
+
+  const hostelLine = params.assignedHostel
+    ? `<p><strong>Assigned hostel:</strong> ${params.assignedHostel}</p>`
     : "";
 
   const responseLines =
@@ -74,6 +79,7 @@ export function buildRegistrationConfirmationEmail(params: {
       <p><strong>Venue:</strong> ${params.venue}</p>
       ${paymentLine}
       ${assignmentLine}
+      ${hostelLine}
       ${responseLines}
       <p><strong>Reference:</strong> ${params.registrationId}</p>
       <p>Please keep this reference for your records.</p>

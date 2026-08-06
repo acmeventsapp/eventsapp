@@ -60,6 +60,7 @@ function matchesSearch(registration: RegistrationUI, query: string) {
     registration.eventTitle,
     registration.responsePreview,
     registration.assignedGroup,
+    registration.assignedHostel,
     ...registration.labeledResponses.map((entry) => `${entry.label} ${entry.value}`),
   ]
     .join(" ")
@@ -136,6 +137,7 @@ export default function RegistrationsList() {
         Email: registration.contactEmail,
         Phone: registration.contactPhone,
         AssignedGroup: registration.assignedGroup ?? "",
+        AssignedHostel: registration.assignedHostel ?? "",
         Status: registration.status,
         PaymentStatus: registration.paymentStatus,
         Amount: registration.amount,
@@ -336,6 +338,11 @@ export default function RegistrationsList() {
                           Group: {registration.assignedGroup}
                         </p>
                       ) : null}
+                      {registration.assignedHostel ? (
+                        <p className="text-sm text-muted-foreground wrap-break-word">
+                          Hostel: {registration.assignedHostel}
+                        </p>
+                      ) : null}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {formatCurrency(registration.amount)} ·{" "}
@@ -440,6 +447,11 @@ export default function RegistrationsList() {
             {selectedRegistration.assignedGroup ? (
               <p>
                 <strong>Assigned group:</strong> {selectedRegistration.assignedGroup}
+              </p>
+            ) : null}
+            {selectedRegistration.assignedHostel ? (
+              <p>
+                <strong>Assigned hostel:</strong> {selectedRegistration.assignedHostel}
               </p>
             ) : null}
             <div className="border-t pt-3 space-y-2">

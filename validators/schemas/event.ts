@@ -2,9 +2,11 @@ import { z } from "zod";
 import { FormFieldsSchema } from "@/validators/schemas/form-field";
 import { EventSpeakersSchema } from "@/validators/schemas/speaker";
 import { EventAssignmentGroupsSchema } from "@/validators/schemas/assignment-group";
+import { EventHostelsSchema } from "@/validators/schemas/hostel";
 import type { FormFieldFormValues } from "@/validators/types/form-field";
 import type { EventSpeakerFormValues } from "@/validators/types/speaker";
 import type { EventAssignmentGroupFormValues } from "@/validators/schemas/assignment-group";
+import type { EventHostelFormValues } from "@/validators/schemas/hostel";
 
 export const EventStatusEnum = z.enum(["DRAFT", "PUBLISHED", "CANCELLED"]);
 
@@ -28,6 +30,7 @@ export type EventFormValues = {
   formFields: FormFieldFormValues[];
   speakers: EventSpeakerFormValues[];
   assignmentGroups: EventAssignmentGroupFormValues[];
+  hostels: EventHostelFormValues[];
 };
 
 export const EventSchema = z
@@ -51,6 +54,7 @@ export const EventSchema = z
     formFields: FormFieldsSchema,
     speakers: EventSpeakersSchema,
     assignmentGroups: EventAssignmentGroupsSchema,
+    hostels: EventHostelsSchema,
   })
   .refine(
     (data) => new Date(data.endDate) >= new Date(data.startDate),

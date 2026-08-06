@@ -34,6 +34,7 @@ import TagFieldSelector, {
   getInitialTagFieldKeys,
 } from "@/components/admin/modules/events/tag-field-selector";
 import AssignmentGroupBuilder from "@/components/admin/modules/events/assignment-group-builder";
+import HostelBuilder from "@/components/admin/modules/events/hostel-builder";
 import SpeakerBuilder from "@/components/admin/modules/events/speaker-builder";
 import { useCreateEvent, useUpdateEvent } from "@/hooks/use-events";
 import { DEFAULT_EVENT_FORM_FIELDS } from "@/lib/form-fields";
@@ -97,7 +98,7 @@ const FORM_STEPS: ReadonlyArray<{
   {
     id: "assignments",
     label: "Assignments",
-    fields: ["assignmentGroups"],
+    fields: ["assignmentGroups", "hostels"],
   },
 ];
 
@@ -183,7 +184,16 @@ export default function ManageEventForm({
           id: group.id,
           name: group.name,
           capacity: group.capacity,
+          targetFieldKey: group.targetFieldKey ?? "",
+          targetFieldValue: group.targetFieldValue ?? "",
           sortOrder: group.sortOrder,
+        })) ?? [],
+      hostels:
+        event?.hostels.map((hostel) => ({
+          id: hostel.id,
+          name: hostel.name,
+          branchIds: hostel.branchIds,
+          sortOrder: hostel.sortOrder,
         })) ?? [],
     },
   });
@@ -762,8 +772,9 @@ export default function ManageEventForm({
             <StepActions />
           </TabsContent>
 
-          <TabsContent value="assignments" className="mt-4">
+          <TabsContent value="assignments" className="mt-4 flex flex-col gap-4">
             <AssignmentGroupBuilder />
+            <HostelBuilder />
 
             <StepActions />
           </TabsContent>
