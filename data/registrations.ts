@@ -2,9 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import {
+  findHostelForRegistrant,
   getBranchIdFromResponses,
+  getRegistrantGender,
   matchesAssignmentGroupFilter,
-  parseHostelBranchIds,
 } from "@/lib/assignments";
 import { extractContactFromResponses } from "@/lib/form-fields";
 import {
@@ -121,7 +122,7 @@ async function assignToHostel(
   eventId: string,
   registrationId: string,
   responses: RegistrationResponses,
-  formFields: Array<{ fieldType: string; fieldKey: string }>
+  formFields: Array<{ fieldType: string; fieldKey: string; label: string }>
 ): Promise<string | null> {
   const branchId = getBranchIdFromResponses(responses, formFields);
   if (!branchId) {
@@ -133,8 +134,11 @@ async function assignToHostel(
     orderBy: { sortOrder: "asc" },
   });
 
-  const matchedHostel = hostels.find((hostel) =>
-    parseHostelBranchIds(hostel.branchIds).includes(branchId)
+  const registrantGender = getRegistrantGender(responses, formFields);
+  const matchedHostel = findHostelForRegistrant(
+    hostels,
+    branchId,
+    registrantGender
   );
 
   if (!matchedHostel) {
@@ -154,7 +158,7 @@ async function assignRegistrant(
   eventId: string,
   registrationId: string,
   responses: RegistrationResponses,
-  formFields: Array<{ fieldType: string; fieldKey: string }>
+  formFields: Array<{ fieldType: string; fieldKey: string; label: string }>
 ) {
   const assignedGroup = await assignToGroup(
     tx,

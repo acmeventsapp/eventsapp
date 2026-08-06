@@ -30,6 +30,7 @@ export interface AssignmentGroupUI {
 export interface EventHostelUI {
   id: string;
   name: string;
+  gender: "MALE" | "FEMALE";
   branchIds: string[];
   sortOrder: number;
 }
@@ -119,6 +120,7 @@ export function toEventHostelUI(hostel: EventHostel): EventHostelUI {
   return {
     id: hostel.id,
     name: hostel.name,
+    gender: hostel.gender,
     branchIds: parseBranchIds(hostel.branchIds),
     sortOrder: hostel.sortOrder,
   };

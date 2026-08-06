@@ -210,6 +210,7 @@ async function syncEventAssignmentGroups(
 function mapHostels(hostels: EventFormValues["hostels"]) {
   return hostels.map((hostel, index) => ({
     name: hostel.name.trim(),
+    gender: hostel.gender,
     branchIds: hostel.branchIds,
     sortOrder: index,
   }));
