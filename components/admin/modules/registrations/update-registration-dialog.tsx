@@ -85,10 +85,10 @@ export default function UpdateRegistrationDialog({
     <DialogModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Update registration"
+      title="Update status"
       description={
         registration
-          ? `Update status for ${registration.contactName || registration.responsePreview}.`
+          ? `Update payment and registration status for ${registration.contactName || registration.responsePreview}.`
           : undefined
       }
       showFooter={false}

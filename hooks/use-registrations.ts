@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   createRegistration,
   deleteRegistration,
+  adminUpdateRegistration,
   adminUpdateRegistrationStatus,
   getRegistrationById,
   getRegistrations,
@@ -12,6 +13,7 @@ import {
 } from "@/data/registrations";
 import type { PaymentStatus, RegistrationStatus } from "@prisma/client";
 import type { AdminUpdateRegistrationValues } from "@/validators/schemas/registration-admin";
+import type { DynamicRegistrationValues } from "@/validators/schemas/registration";
 
 export const REGISTRATION_KEYS = {
   all: ["registrations"] as const,
@@ -60,6 +62,17 @@ export function useUpdateRegistrationStatus() {
   return useMutation(
     ({ id, data }: { id: string; data: AdminUpdateRegistrationValues }) =>
       adminUpdateRegistrationStatus(id, data),
+    {
+      onSuccess: () => queryClient.invalidateQueries(REGISTRATION_KEYS.all),
+    }
+  );
+}
+
+export function useUpdateRegistration() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ id, responses }: { id: string; responses: DynamicRegistrationValues }) =>
+      adminUpdateRegistration(id, { responses }),
     {
       onSuccess: () => queryClient.invalidateQueries(REGISTRATION_KEYS.all),
     }

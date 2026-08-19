@@ -163,6 +163,37 @@ export function buildDynamicRegistrationDefaults(fields: FormFieldUI[]) {
   return defaults;
 }
 
+export function buildRegistrationFormValues(
+  fields: FormFieldUI[],
+  responses: RegistrationResponses
+): DynamicRegistrationValues {
+  const values = buildDynamicRegistrationDefaults(fields);
+
+  for (const field of fields) {
+    const value = responses[field.fieldKey];
+    if (value === undefined) continue;
+
+    if (isMultiValueField(field)) {
+      values[field.fieldKey] = Array.isArray(value) ? value : [];
+      continue;
+    }
+
+    if (field.fieldType === "CHECKBOX" && normalizeFieldOptions(field.options).length === 0) {
+      values[field.fieldKey] = Boolean(value);
+      continue;
+    }
+
+    if (field.fieldType === "ORG_BRANCH") {
+      values[field.fieldKey] = isOrgBranchValue(value) ? value : null;
+      continue;
+    }
+
+    values[field.fieldKey] = typeof value === "string" ? value : String(value ?? "");
+  }
+
+  return values;
+}
+
 export function serializeRegistrationResponses(
   fields: FormFieldUI[],
   values: DynamicRegistrationValues

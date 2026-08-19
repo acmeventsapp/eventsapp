@@ -4,9 +4,11 @@ import type { FormFieldUI } from "@/validators/types/form-field";
 
 export interface RegistrationExportColumn {
   header: string;
-  eventId: string;
-  fieldKey: string;
   fieldType: FormFieldUI["fieldType"];
+}
+
+function sortedFormFields(formFields: FormFieldUI[]) {
+  return [...formFields].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 export function getRegistrationExportColumns(
@@ -18,14 +20,10 @@ export function getRegistrationExportColumns(
 
   if (selectedEventId !== "all") {
     const event = eventsById.get(selectedEventId);
-    return [...(event?.formFields ?? [])]
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((field) => ({
-        header: field.label,
-        eventId: selectedEventId,
-        fieldKey: field.fieldKey,
-        fieldType: field.fieldType,
-      }));
+    return sortedFormFields(event?.formFields ?? []).map((field) => ({
+      header: field.label,
+      fieldType: field.fieldType,
+    }));
   }
 
   const columns: RegistrationExportColumn[] = [];
@@ -35,14 +33,11 @@ export function getRegistrationExportColumns(
     const event = eventsById.get(registration.eventId);
     if (!event) continue;
 
-    for (const field of [...event.formFields].sort((a, b) => a.sortOrder - b.sortOrder)) {
-      const key = `${registration.eventId}:${field.fieldKey}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+    for (const field of sortedFormFields(event.formFields)) {
+      if (seen.has(field.label)) continue;
+      seen.add(field.label);
       columns.push({
-        header: `${event.title} — ${field.label}`,
-        eventId: registration.eventId,
-        fieldKey: field.fieldKey,
+        header: field.label,
         fieldType: field.fieldType,
       });
     }
@@ -53,21 +48,20 @@ export function getRegistrationExportColumns(
 
 export function buildRegistrationExportRows(
   registrations: RegistrationUI[],
-  columns: RegistrationExportColumn[]
+  columns: RegistrationExportColumn[],
+  events: EventUI[]
 ): Record<string, string>[] {
+  const eventsById = new Map(events.map((event) => [event.id, event]));
+
   return registrations.map((registration) => {
+    const event = eventsById.get(registration.eventId);
     const row: Record<string, string> = {};
 
     for (const column of columns) {
-      if (column.eventId !== registration.eventId) {
-        row[column.header] = "";
-        continue;
-      }
-
-      row[column.header] = formatResponseValue(
-        registration.responses[column.fieldKey],
-        column.fieldType
-      );
+      const field = event?.formFields.find((entry) => entry.label === column.header);
+      row[column.header] = field
+        ? formatResponseValue(registration.responses[field.fieldKey], field.fieldType)
+        : "";
     }
 
     return row;
