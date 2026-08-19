@@ -505,6 +505,91 @@ export async function adminUpdateRegistrationStatus(
   }
 }
 
+export async function adminUpdateRegistration(
+  id: string,
+  input: { responses: DynamicRegistrationValues }
+) {
+  try {
+    const session = await getAdminSession();
+    if (!session) {
+      return { success: false as const, error: "Unauthorized" };
+    }
+
+    const existing = await prisma.eventRegistration.findUnique({
+      where: { id },
+      include: {
+        event: {
+          include: {
+            formFields: {
+              orderBy: { sortOrder: "asc" },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existing) {
+      return { success: false as const, error: "Registration not found" };
+    }
+
+    if (existing.event.formFields.length === 0) {
+      return { success: false as const, error: "Registration form is not configured" };
+    }
+
+    const formFields = existing.event.formFields.map(toFormFieldUI);
+    const parsed = buildDynamicRegistrationSchema(formFields).safeParse(input.responses);
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Invalid registration data";
+      return { success: false as const, error: firstError };
+    }
+
+    const responses = serializeRegistrationResponses(formFields, parsed.data);
+    const contact = extractContactFromResponses(formFields, responses);
+
+    if (!existing.event.isFree && !contact.contactEmail) {
+      return { success: false as const, error: "A valid email response is required" };
+    }
+
+    const shouldReassign =
+      existing.status === "CONFIRMED" &&
+      (existing.paymentStatus === "PAID" || existing.paymentStatus === "FREE");
+
+    const registration = await prisma.$transaction(async (tx) => {
+      await tx.eventRegistration.update({
+        where: { id },
+        data: {
+          responses,
+          contactEmail: contact.contactEmail || null,
+          contactName: contact.contactName || null,
+          contactPhone: contact.contactPhone || null,
+          ...(shouldReassign ? { assignmentGroupId: null, hostelId: null } : {}),
+        },
+      });
+
+      if (shouldReassign) {
+        await assignRegistrant(
+          tx,
+          existing.eventId,
+          id,
+          responses as RegistrationResponses,
+          existing.event.formFields
+        );
+      }
+
+      return tx.eventRegistration.findUniqueOrThrow({
+        where: { id },
+        include: registrationInclude,
+      });
+    });
+
+    return { success: true as const, data: toRegistrationUI(registration) };
+  } catch (error) {
+    console.error("adminUpdateRegistration", error);
+    return { success: false as const, error: "Failed to update registration" };
+  }
+}
+
 export async function getRegistrationWithEvent(id: string) {
   return prisma.eventRegistration.findUnique({
     where: { id },

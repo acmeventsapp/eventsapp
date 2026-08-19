@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Eye, Pencil, Trash2, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { toast } from "sonner";
 import PageBreadcrumb from "@/components/admin/header/pagebreadcrumb";
 import PageHeader from "@/components/admin/header/pageHeader";
@@ -33,6 +33,8 @@ import { matchesOrgFilters } from "@/lib/registration-org";
 import { formatCurrency } from "@/lib/utils";
 import type { RegistrationUI } from "@/validators/types/event";
 
+import EditRegistrationDialog from "@/components/admin/modules/registrations/edit-registration-dialog";
+import RegistrationRowActions from "@/components/admin/modules/registrations/registration-row-actions";
 import UpdateRegistrationDialog from "@/components/admin/modules/registrations/update-registration-dialog";
 
 const DownloadNameTagButton = dynamic(
@@ -103,8 +105,24 @@ export default function RegistrationsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegistration, setSelectedRegistration] =
     useState<RegistrationUI | null>(null);
-  const [editTarget, setEditTarget] = useState<RegistrationUI | null>(null);
+  const [fieldsEditTarget, setFieldsEditTarget] = useState<RegistrationUI | null>(null);
+  const [statusEditTarget, setStatusEditTarget] = useState<RegistrationUI | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RegistrationUI | null>(null);
+
+  const eventsById = useMemo(
+    () => new Map(events.map((event) => [event.id, event])),
+    [events]
+  );
+
+  function getRegistrationFormFields(registration: RegistrationUI) {
+    return eventsById.get(registration.eventId)?.formFields ?? [];
+  }
+
+  function handleRegistrationUpdated(updated: RegistrationUI) {
+    if (selectedRegistration?.id === updated.id) {
+      setSelectedRegistration(updated);
+    }
+  }
 
   const filters = {
     eventId: eventId === "all" ? undefined : eventId,
@@ -296,8 +314,8 @@ export default function RegistrationsList() {
   );
 
   const exportRows = useMemo(
-    () => buildRegistrationExportRows(filteredRegistrations, exportColumns),
-    [filteredRegistrations, exportColumns]
+    () => buildRegistrationExportRows(filteredRegistrations, exportColumns, events),
+    [filteredRegistrations, exportColumns, events]
   );
 
   function handleExport() {
@@ -528,7 +546,7 @@ export default function RegistrationsList() {
           </div>
 
           {appliedFilters.length > 0 ? (
-            <div className="flex flex-col gap-2 rounded-lg border bg-muted/30 p-3">
+            <div className="flex flex-col gap-2 rounded-lg border bg-muted/10 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium">Applied filters</p>
                 <Button variant="ghost" size="sm" onClick={clearAllFilters}>
@@ -610,57 +628,25 @@ export default function RegistrationsList() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 border-t pt-3 lg:flex lg:shrink-0 lg:items-center lg:border-t-0 lg:pt-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditTarget(registration)}
-                      className="w-full lg:w-auto"
-                    >
-                      <Pencil className="size-4" data-icon="inline-start" />
-                      Update
-                    </Button>
-
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setSelectedRegistration(registration)}
-                      className="w-full lg:w-auto"
-                    >
-                      <Eye className="size-4" data-icon="inline-start" />
-                      View
-                    </Button>
-
-                    {/* for mobile */}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteTarget(registration)}
-                      className="w-full lg:w-auto inline-flex md:hidden"
-                    >
-                      <Trash2 className="size-4" data-icon="inline-start" />
-                      Delete
-                    </Button>
-
-                    {canPrintTag(registration) ? (
-                      <DownloadNameTagButton
-                        registration={registration}
-                        label="Download name tag"
-                        size="sm"
-                        className="col-span-2 w-full lg:col-span-1 lg:w-auto"
-                      />
-                    ) : null}
-
-                    {/* for desktop */}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteTarget(registration)}
-                      className="w-full lg:w-auto hidden md:inline-flex"
-                    >
-                      <Trash2 className="size-4" data-icon="inline-start" />
-                      Delete
-                    </Button>
+                  <div className="flex shrink-0 items-center justify-end border-t pt-3 lg:border-t-0 lg:pt-0">
+                    <RegistrationRowActions
+                      registration={registration}
+                      showNameTag={canPrintTag(registration)}
+                      nameTagAction={
+                        canPrintTag(registration) ? (
+                          <DownloadNameTagButton
+                            registration={registration}
+                            label="Download name tag"
+                            size="sm"
+                            className="w-full justify-start"
+                          />
+                        ) : null
+                      }
+                      onView={() => setSelectedRegistration(registration)}
+                      onUpdate={() => setFieldsEditTarget(registration)}
+                      onUpdateStatus={() => setStatusEditTarget(registration)}
+                      onDelete={() => setDeleteTarget(registration)}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -722,46 +708,58 @@ export default function RegistrationsList() {
                 </p>
               ))}
             </div>
-            <div className="flex flex-wrap gap-2 border-t pt-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditTarget(selectedRegistration)}
-              >
-                <Pencil className="size-4" data-icon="inline-start" />
-                Update status
-              </Button>
-              {canPrintTag(selectedRegistration) ? (
-                <DownloadNameTagButton
-                  registration={selectedRegistration}
-                  label="Download name tag"
-                  size="sm"
-                />
-              ) : null}
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setDeleteTarget(selectedRegistration)}
-              >
-                <Trash2 className="size-4" data-icon="inline-start" />
-                Delete
-              </Button>
+            <div className="flex justify-end border-t pt-3">
+              <RegistrationRowActions
+                registration={selectedRegistration}
+                showNameTag={canPrintTag(selectedRegistration)}
+                nameTagAction={
+                  canPrintTag(selectedRegistration) ? (
+                    <DownloadNameTagButton
+                      registration={selectedRegistration}
+                      label="Download name tag"
+                      size="sm"
+                      className="w-full justify-start"
+                    />
+                  ) : null
+                }
+                onView={() => setSelectedRegistration(selectedRegistration)}
+                onUpdate={() => {
+                  setFieldsEditTarget(selectedRegistration);
+                  setSelectedRegistration(null);
+                }}
+                onUpdateStatus={() => {
+                  setStatusEditTarget(selectedRegistration);
+                  setSelectedRegistration(null);
+                }}
+                onDelete={() => {
+                  setDeleteTarget(selectedRegistration);
+                  setSelectedRegistration(null);
+                }}
+              />
             </div>
           </div>
         ) : null}
       </ScrollableDialogModal>
 
-      <UpdateRegistrationDialog
-        registration={editTarget}
-        open={Boolean(editTarget)}
+      <EditRegistrationDialog
+        registration={fieldsEditTarget}
+        formFields={
+          fieldsEditTarget ? getRegistrationFormFields(fieldsEditTarget) : []
+        }
+        open={Boolean(fieldsEditTarget)}
         onOpenChange={(open) => {
-          if (!open) setEditTarget(null);
+          if (!open) setFieldsEditTarget(null);
         }}
-        onUpdated={(updated) => {
-          if (selectedRegistration?.id === updated.id) {
-            setSelectedRegistration(updated);
-          }
+        onUpdated={handleRegistrationUpdated}
+      />
+
+      <UpdateRegistrationDialog
+        registration={statusEditTarget}
+        open={Boolean(statusEditTarget)}
+        onOpenChange={(open) => {
+          if (!open) setStatusEditTarget(null);
         }}
+        onUpdated={handleRegistrationUpdated}
       />
 
       <DialogModal

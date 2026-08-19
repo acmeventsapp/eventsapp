@@ -37,6 +37,7 @@ import type { FormFieldUI } from "@/validators/types/form-field";
 
 interface DynamicRegistrationFormProps {
   fields: FormFieldUI[];
+  initialValues?: DynamicRegistrationValues;
   onSubmit: (values: DynamicRegistrationValues) => Promise<void>;
   children: React.ReactNode;
 }
@@ -181,16 +182,21 @@ function DependentRadioField({
 
 export default function DynamicRegistrationForm({
   fields,
+  initialValues,
   onSubmit,
   children,
 }: DynamicRegistrationFormProps) {
   const schema = useMemo(() => buildDynamicRegistrationSchema(fields), [fields]);
-  const defaultValues = useMemo(() => buildDynamicRegistrationDefaults(fields), [fields]);
+  const emptyDefaults = useMemo(() => buildDynamicRegistrationDefaults(fields), [fields]);
 
   const form = useForm<DynamicRegistrationValues>({
     resolver: zodResolver(schema as never),
-    defaultValues,
+    defaultValues: initialValues ?? emptyDefaults,
   });
+
+  useEffect(() => {
+    form.reset(initialValues ?? emptyDefaults);
+  }, [emptyDefaults, form, initialValues]);
 
   return (
     <Form {...form}>
